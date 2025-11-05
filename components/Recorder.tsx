@@ -15,10 +15,15 @@ export default function Recorder({ projectId }: { projectId: string }) {
 
   React.useEffect(() => {
     let mounted = true
+    let localStream: MediaStream | null = null
     const init = async () => {
       try {
         const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true })
-        if (!mounted) return
+        if (!mounted) {
+          s.getTracks().forEach((t) => t.stop())
+          return
+        }
+        localStream = s
         setStream(s)
         if (videoRef.current) {
           videoRef.current.srcObject = s
@@ -30,7 +35,7 @@ export default function Recorder({ projectId }: { projectId: string }) {
     init()
     return () => {
       mounted = false
-      if (stream) stream.getTracks().forEach((t) => t.stop())
+      if (localStream) localStream.getTracks().forEach((t) => t.stop())
     }
   }, [])
 

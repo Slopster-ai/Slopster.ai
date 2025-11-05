@@ -15,10 +15,21 @@ This guide walks you through setting up the AWS infrastructure for Slopster.ai v
 AWS_REGION=us-east-1
 BUCKET_NAME=slopster-videos-dev
 
-aws s3 mb s3://${slopster-videos-dev} --region ${us-east-1}
+aws s3 mb s3://${BUCKET_NAME} --region ${AWS_REGION}
 
 # Enable CORS
 aws s3api put-bucket-cors --bucket ${BUCKET_NAME} --cors-configuration file://aws-cors.json
+```
+
+PowerShell:
+```powershell
+$region = "us-east-1"
+$bucket = "slopster-videos-dev"  # must be globally unique
+
+aws s3 mb "s3://$bucket" --region $region
+
+# Enable CORS
+aws s3api put-bucket-cors --bucket $bucket --cors-configuration file://aws-cors.json --region $region
 ```
 
 Create `aws-cors.json`:
@@ -55,6 +66,17 @@ QUEUE_URL=$(aws sqs get-queue-url \
 echo "Queue URL: ${QUEUE_URL}"
 ```
 
+PowerShell:
+```powershell
+$region = "us-east-1"
+$queueName = "video-processing-queue"
+
+aws sqs create-queue --queue-name $queueName --region $region --attributes VisibilityTimeout=900,ReceiveMessageWaitTimeSeconds=20
+
+$queueUrl = aws sqs get-queue-url --queue-name $queueName --region $region --query 'QueueUrl' --output text
+Write-Host "Queue URL: $queueUrl"
+```
+
 ## Step 3: Create IAM Role for Lambda
 
 Create `lambda-trust-policy.json`:
@@ -78,6 +100,11 @@ Create the role:
 aws iam create-role \
   --role-name SlopsterVideoProcessorRole \
   --assume-role-policy-document file://lambda-trust-policy.json
+```
+
+PowerShell:
+```powershell
+aws iam create-role --role-name SlopsterVideoProcessorRole --assume-role-policy-document file://lambda-trust-policy.json
 ```
 
 Create `lambda-policy.json`:
@@ -123,6 +150,11 @@ aws iam put-role-policy \
   --policy-document file://lambda-policy.json
 ```
 
+PowerShell:
+```powershell
+aws iam put-role-policy --role-name SlopsterVideoProcessorRole --policy-name SlopsterVideoProcessorPolicy --policy-document file://lambda-policy.json
+```
+
 ## Step 4: Create FFmpeg Lambda Layer
 
 Download FFmpeg binary for Amazon Linux 2:
@@ -142,6 +174,8 @@ chmod +x bin/ffmpeg bin/ffprobe
 zip -r ffmpeg-layer.zip .
 ```
 
+Windows note: For this step, it's easiest to use WSL or Git Bash so that `wget`, `tar`, and `zip` are available. If you prefer PowerShell, ensure `curl.exe`, `tar`, and `Compress-Archive` are available and adapt the commands accordingly.
+
 Create the layer:
 ```bash
 aws lambda publish-layer-version \
@@ -149,6 +183,11 @@ aws lambda publish-layer-version \
   --zip-file fileb://ffmpeg-layer.zip \
   --compatible-runtimes nodejs20.x \
   --region ${AWS_REGION}
+```
+
+PowerShell:
+```powershell
+aws lambda publish-layer-version --layer-name ffmpeg --zip-file fileb://ffmpeg-layer.zip --compatible-runtimes nodejs20.x --region $region
 ```
 
 Note the `LayerVersionArn` from the output.
@@ -176,6 +215,30 @@ aws lambda create-function \
   --region ${AWS_REGION}
 ```
 
+PowerShell:
+```powershell
+$region = "us-east-1"
+$bucket = "slopster-videos-dev"
+
+Set-Location aws\lambda\video-processor
+npm ci
+
+if (Test-Path function.zip) { Remove-Item function.zip }
+Compress-Archive -Path * -DestinationPath function.zip -Force
+
+aws lambda create-function `
+  --function-name SlopsterVideoProcessor `
+  --runtime nodejs20.x `
+  --role arn:aws:iam::YOUR_ACCOUNT_ID:role/SlopsterVideoProcessorRole `
+  --handler index.handler `
+  --zip-file fileb://function.zip `
+  --timeout 900 `
+  --memory-size 3008 `
+  --layers YOUR_FFMPEG_LAYER_ARN `
+  --environment Variables="{AWS_REGION=$region,S3_BUCKET=$bucket,SUPABASE_URL=your-supabase-url,SUPABASE_SERVICE_KEY=your-service-key}" `
+  --region $region
+```
+
 ## Step 6: Add SQS Trigger to Lambda
 
 ```bash
@@ -192,6 +255,15 @@ aws lambda create-event-source-mapping \
   --event-source-arn YOUR_QUEUE_ARN \
   --batch-size 1 \
   --region ${AWS_REGION}
+```
+
+PowerShell:
+```powershell
+$region = "us-east-1"
+
+$lambdaArn = aws lambda get-function --function-name SlopsterVideoProcessor --region $region --query 'Configuration.FunctionArn' --output text
+
+aws lambda create-event-source-mapping --function-name SlopsterVideoProcessor --event-source-arn YOUR_QUEUE_ARN --batch-size 1 --region $region
 ```
 
 ## Step 7: Create IAM User for Application
@@ -211,6 +283,14 @@ aws iam attach-user-policy \
   --policy-arn arn:aws:iam::aws:policy/AmazonSQSFullAccess
 
 # Create access key
+aws iam create-access-key --user-name slopster-app
+```
+
+PowerShell:
+```powershell
+aws iam create-user --user-name slopster-app
+aws iam attach-user-policy --user-name slopster-app --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+aws iam attach-user-policy --user-name slopster-app --policy-arn arn:aws:iam::aws:policy/AmazonSQSFullAccess
 aws iam create-access-key --user-name slopster-app
 ```
 
@@ -236,6 +316,13 @@ aws lambda invoke \
   response.json
 
 cat response.json
+```
+
+PowerShell:
+```powershell
+$region = "us-east-1"
+aws lambda invoke --function-name SlopsterVideoProcessor --payload file://test-event.json --region $region response.json
+Get-Content response.json
 ```
 
 Example `test-event.json`:

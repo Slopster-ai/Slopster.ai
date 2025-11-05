@@ -91,10 +91,11 @@ export function IdeaAssistant({
           </div>
         ))}
         {!loading && ideas.length === 0 && (
-          <div className="text-sm text-muted">No ideas yet. Click "Generate ideas" to get started.</div>
+          <div className="text-sm text-muted">No ideas yet. Click &quot;Generate ideas&quot; to get started.</div>
         )}
       </div>
     </div>
   )}
+
 
 
