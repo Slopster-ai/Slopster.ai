@@ -15,7 +15,7 @@ This guide walks you through setting up the AWS infrastructure for Slopster.ai v
 AWS_REGION=us-east-1
 BUCKET_NAME=slopster-videos-dev
 
-aws s3 mb s3://${BUCKET_NAME} --region ${AWS_REGION}
+aws s3 mb s3://${slopster-videos-dev} --region ${us-east-1}
 
 # Enable CORS
 aws s3api put-bucket-cors --bucket ${BUCKET_NAME} --cors-configuration file://aws-cors.json

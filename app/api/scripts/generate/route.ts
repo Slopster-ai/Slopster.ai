@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       .from('scripts')
       .insert({
         project_id: projectId,
-        content: result.script,
+        content: { ...result.script, original_prompt: prompt },
         platform,
         duration,
         tone: tone || 'casual',

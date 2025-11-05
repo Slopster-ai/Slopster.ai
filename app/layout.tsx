@@ -3,7 +3,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import NavBar from '../components/NavBar'
 import Footer from '../components/Footer'
-import Mascot from '../components/Mascot'
+import SupportWidget from '../components/SupportWidget'
 
 export const metadata: Metadata = {
   title: 'Slopster.ai - AI-Powered Video Editor',
@@ -33,7 +33,7 @@ export default function RootLayout({
         </a>
         <NavBar />
         <main id="main-content">{children}</main>
-        <Mascot />
+        <SupportWidget />
         <Footer />
       </body>
     </html>

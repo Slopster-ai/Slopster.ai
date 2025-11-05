@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getUser } from '@/lib/supabase/auth'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ScriptGenerator from '@/components/ScriptGenerator'
 import VideoUploader from '@/components/VideoUploader'
@@ -8,6 +9,7 @@ import { Container } from '@/components/ui/Container'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Progress } from '@/components/ui/Progress'
+import ProjectSettings from '@/components/ProjectSettings'
 
 export default async function ProjectPage({ params }: { params: { id: string } }) {
   const user = await getUser()
@@ -27,6 +29,11 @@ export default async function ProjectPage({ params }: { params: { id: string } }
     notFound()
   }
 
+  // If the project hasn't completed Stage 1, send user to Strategy first
+  if ((project as any).flow_stage && (project as any).flow_stage < 2) {
+    redirect(`/projects/${params.id}/strategy`)
+  }
+
   // Fetch scripts
   const { data: scripts } = await supabase
     .from('scripts')
@@ -44,11 +51,14 @@ export default async function ProjectPage({ params }: { params: { id: string } }
   return (
     <Container>
       <div className="py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-medium">{project.title}</h1>
-          {project.description && (
-            <p className="mt-2 text-sm text-muted">{project.description}</p>
-          )}
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-medium">{project.title}</h1>
+            {project.description && (
+              <p className="mt-2 text-sm text-muted">{project.description}</p>
+            )}
+          </div>
+          <ProjectSettings id={project.id} title={project.title} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -63,19 +73,36 @@ export default async function ProjectPage({ params }: { params: { id: string } }
               {scripts && scripts.length > 0 && (
                 <div className="mt-6 space-y-4">
                   <h3 className="text-lg font-medium">Generated scripts</h3>
-                  {scripts.map((script) => (
-                    <div key={script.id} className="p-4 rounded-xl hairline">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs text-muted capitalize">
-                          {script.platform} • {script.duration}s • {script.tone}
-                        </span>
-                        <Badge variant="subtle">${script.cost.toFixed(4)}</Badge>
-                      </div>
-                      <pre className="text-sm text-foreground/80 whitespace-pre-wrap">
-                        {JSON.stringify(script.content, null, 2)}
-                      </pre>
-                    </div>
-                  ))}
+                  {scripts.map((script) => {
+                    const content: any = script.content || {}
+                    const raw = typeof content.edited_text === 'string'
+                      ? content.edited_text as string
+                      : (() => {
+                          const parts: string[] = []
+                          if (content.hook) parts.push(`HOOK:\n${content.hook}\n`)
+                          if (Array.isArray(content.body)) {
+                            parts.push('BODY:')
+                            for (const line of content.body) parts.push(`- ${line}`)
+                            parts.push('')
+                          }
+                          if (content.cta) parts.push(`CTA:\n${content.cta}`)
+                          return parts.join('\n')
+                        })()
+                    const preview = raw.length > 220 ? raw.slice(0, 220) + '…' : raw
+                    return (
+                      <Link key={script.id} href={`/projects/${params.id}/scripts/${script.id}`} className="block p-4 rounded-xl hairline hover:shadow-depth transition-shadow">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-xs text-muted capitalize">
+                            {script.platform} • {script.duration}s • {script.tone}
+                          </span>
+                          <Badge variant="subtle">${script.cost.toFixed(4)}</Badge>
+                        </div>
+                        <p className="text-sm text-foreground/80 whitespace-pre-wrap">
+                          {preview || 'No preview available.'}
+                        </p>
+                      </Link>
+                    )
+                  })}
                 </div>
               )}
             </CardContent>

@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 import { Container } from '@/components/ui/Container'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Plus, Folder } from 'lucide-react'
+import { Folder } from 'lucide-react'
+import NewProjectButton from '@/components/NewProjectButton'
 
 export default async function DashboardPage() {
   const user = await getUser()
@@ -27,11 +28,7 @@ export default async function DashboardPage() {
             <h1 className="text-3xl font-medium">Your projects</h1>
             <p className="mt-2 text-sm text-muted">Create and manage your video projects</p>
           </div>
-          <form action="/api/projects/create" method="POST">
-            <Button type="submit" className="inline-flex items-center gap-2">
-              <Plus className="h-4 w-4" /> New project
-            </Button>
-          </form>
+          <NewProjectButton />
         </div>
 
         {!projects || projects.length === 0 ? (

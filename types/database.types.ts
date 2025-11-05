@@ -17,18 +17,21 @@ export interface Database {
           email: string
           created_at: string
           updated_at: string
+          brand_context: Json
         }
         Insert: {
           id: string
           email: string
           created_at?: string
           updated_at?: string
+          brand_context?: Json
         }
         Update: {
           id?: string
           email?: string
           created_at?: string
           updated_at?: string
+          brand_context?: Json
         }
       }
       projects: {
@@ -39,6 +42,8 @@ export interface Database {
           description: string | null
           created_at: string
           updated_at: string
+          strategy_context: Json
+          flow_stage: number
         }
         Insert: {
           id?: string
@@ -47,6 +52,8 @@ export interface Database {
           description?: string | null
           created_at?: string
           updated_at?: string
+          strategy_context?: Json
+          flow_stage?: number
         }
         Update: {
           id?: string
@@ -55,6 +62,8 @@ export interface Database {
           description?: string | null
           created_at?: string
           updated_at?: string
+          strategy_context?: Json
+          flow_stage?: number
         }
       }
       scripts: {

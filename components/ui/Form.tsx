@@ -5,9 +5,13 @@ export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLab
   return <label className={clsx('block text-sm text-muted', className)} {...props} />
 }
 
-export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(function Input(
+  { className, ...props },
+  ref
+) {
   return (
     <input
+      ref={ref}
       className={clsx(
         'w-full rounded-xl bg-[#0e0f11] text-foreground placeholder-muted hairline px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring',
         className
@@ -15,11 +19,15 @@ export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInp
       {...props}
     />
   )
-}
+})
 
-export function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(function Textarea(
+  { className, ...props },
+  ref
+) {
   return (
     <textarea
+      ref={ref}
       className={clsx(
         'w-full rounded-xl bg-[#0e0f11] text-foreground placeholder-muted hairline px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring',
         className
@@ -27,11 +35,15 @@ export function Textarea({ className, ...props }: React.TextareaHTMLAttributes<H
       {...props}
     />
   )
-}
+})
 
-export function Select({ className, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(function Select(
+  { className, children, ...props },
+  ref
+) {
   return (
     <select
+      ref={ref}
       className={clsx(
         'w-full rounded-xl bg-[#0e0f11] text-foreground hairline px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring',
         className
@@ -41,6 +53,6 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
       {children}
     </select>
   )
-}
+})
 
 

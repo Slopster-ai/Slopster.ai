@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from './ui/Button'
 import { Input, Textarea, Label, Select } from './ui/Form'
 
@@ -16,6 +17,55 @@ export default function ScriptGenerator({ projectId }: ScriptGeneratorProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [generatedScript, setGeneratedScript] = useState<any>(null)
+  const router = useRouter()
+
+  // Prefill from strategy_context when available
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      try {
+        const [strategyRes, profileRes] = await Promise.all([
+          fetch(`/api/projects/${projectId}/strategy`),
+          fetch('/api/profile/context'),
+        ])
+        const strategy = await strategyRes.json()
+        const profile = await profileRes.json()
+        if (!strategyRes.ok) throw new Error(strategy.error || 'Failed to load strategy')
+        if (!profileRes.ok) throw new Error(profile.error || 'Failed to load profile')
+
+        const sc = strategy.strategy_context || {}
+        const bc = profile.brand_context || {}
+
+        if (sc.platform) setPlatform(sc.platform)
+        if (sc.selectedIdea?.durationSec) {
+          const d = Math.max(15, Math.min(180, Number(sc.selectedIdea.durationSec) || 30))
+          setDuration(d)
+        }
+        // Seed prompt
+        const parts: string[] = []
+        if (bc.brandVoice) parts.push(`Brand voice: ${bc.brandVoice}`)
+        if (bc.channelSummary) parts.push(`Channel: ${bc.channelSummary}`)
+        if (sc.purpose) parts.push(`Purpose: ${sc.purpose}`)
+        if (sc.audience?.description) parts.push(`Audience: ${sc.audience.description}`)
+        if (sc.selectedIdea) {
+          parts.push(`Idea: ${sc.selectedIdea.title}`)
+          if (sc.selectedIdea.hook) parts.push(`Hook: ${sc.selectedIdea.hook}`)
+          if (Array.isArray(sc.selectedIdea.outline)) {
+            parts.push('Outline:')
+            for (const b of sc.selectedIdea.outline) parts.push(`- ${b}`)
+          }
+        }
+        const seeded = parts.join('\n')
+        if (!cancelled && seeded) setPrompt(seeded)
+      } catch (_) {
+        // Ignore prefill errors; keep defaults
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [projectId])
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,9 +87,7 @@ export default function ScriptGenerator({ projectId }: ScriptGeneratorProps) {
 
       const data = await response.json()
       setGeneratedScript(data.script)
-      
-      // Reload page to show new script
-      window.location.reload()
+      router.push(`/projects/${projectId}/scripts/${data.script.id}`)
     } catch (err: any) {
       setError(err.message)
     } finally {

@@ -29,8 +29,8 @@ export async function generateScript(params: ScriptParams) {
       },
       { role: 'user', content: prompt },
     ],
-    max_tokens: 1500,
-    temperature: 0.8,
+    max_completion_tokens: 1500,
+    temperature: 1,
     response_format: { type: 'json_object' },
   })
 
@@ -75,7 +75,7 @@ export async function analyzeVirality(script: string): Promise<ViralityAnalysis>
       },
       { role: 'user', content: `Analyze this script:\n\n${script}` },
     ],
-    max_tokens: 1000,
+    max_completion_tokens: 1000,
     temperature: 0.7,
     response_format: { type: 'json_object' },
   })
