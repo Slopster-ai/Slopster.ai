@@ -22,7 +22,7 @@ export default function SupportWidget() {
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault()
     if (!input.trim() || loading) return
-    const next = [...messages, { role: 'user', content: input.trim() }]
+    const next: ChatMessage[] = [...messages, { role: 'user', content: input.trim() }]
     setMessages(next)
     setInput('')
     setLoading(true)
