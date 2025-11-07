@@ -14,11 +14,13 @@ interface Job {
 
 interface JobProgressProps {
   jobId: string
+  videoId?: string
   onComplete?: (outputUrl: string) => void
 }
 
-export default function JobProgress({ jobId, onComplete }: JobProgressProps) {
+export default function JobProgress({ jobId, videoId, onComplete }: JobProgressProps) {
   const [job, setJob] = useState<Job | null>(null)
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -30,12 +32,22 @@ export default function JobProgress({ jobId, onComplete }: JobProgressProps) {
         .eq('id', jobId)
         .single()
       
-      if (data) {
-        setJob(data)
-        if (data.status === 'completed' && data.output_url && onComplete) {
-          onComplete(data.output_url)
+        if (data) {
+          setJob(data)
+          if (data.status === 'completed') {
+            if (onComplete && data.output_url) onComplete(data.output_url)
+            if (videoId) {
+              // Fetch a presigned download URL from the server
+              try {
+                const res = await fetch(`/api/videos/download?videoId=${videoId}`)
+                if (res.ok) {
+                  const j = await res.json()
+                  if (j.url) setDownloadUrl(j.url)
+                }
+              } catch {}
+            }
+          }
         }
-      }
     }
 
     fetchJob()
@@ -55,8 +67,14 @@ export default function JobProgress({ jobId, onComplete }: JobProgressProps) {
           const updatedJob = payload.new as Job
           setJob(updatedJob)
           
-          if (updatedJob.status === 'completed' && updatedJob.output_url && onComplete) {
-            onComplete(updatedJob.output_url)
+          if (updatedJob.status === 'completed') {
+            if (onComplete && updatedJob.output_url) onComplete(updatedJob.output_url)
+            if (videoId) {
+              fetch(`/api/videos/download?videoId=${videoId}`)
+                .then(r => r.ok ? r.json() : null)
+                .then(j => { if (j?.url) setDownloadUrl(j.url) })
+                .catch(() => {})
+            }
           }
         }
       )

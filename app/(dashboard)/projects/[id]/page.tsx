@@ -128,7 +128,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
                       </div>
                       {video.jobs && video.jobs.length > 0 && (
                         <div className="mt-2">
-                          <JobProgress jobId={video.jobs[0].id} />
+                          <JobProgress jobId={video.jobs[0].id} videoId={video.id} />
                         </div>
                       )}
                     </div>
