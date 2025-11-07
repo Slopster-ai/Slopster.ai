@@ -97,7 +97,18 @@ export default function Recorder({ projectId }: { projectId: string }) {
       if (e.data && e.data.size > 0) setChunks((c) => [...c, e.data])
     }
     mr.onstop = () => {
+      if (!chunks || chunks.length === 0) {
+        console.error('No data captured; recording too short or codec unsupported')
+        setError('No video data captured. Try recording for a few seconds or switch browser.')
+        setRecordedBlob(null)
+        return
+      }
       const blob = new Blob(chunks, { type: selectedMimeType || 'video/webm' })
+      if (blob.size === 0) {
+        setError('Recorded video is empty. Try again and ensure permissions are allowed.')
+        setRecordedBlob(null)
+        return
+      }
       setRecordedBlob(blob)
     }
     mr.onerror = (e) => {
@@ -107,7 +118,8 @@ export default function Recorder({ projectId }: { projectId: string }) {
     }
 
     try {
-      mr.start()
+      // Collect data every second to ensure chunks arrive
+      mr.start(1000)
       setMediaRecorder(mr)
       setRecording(true)
     } catch (e: any) {
@@ -118,8 +130,17 @@ export default function Recorder({ projectId }: { projectId: string }) {
 
   const stopRecording = () => {
     if (!mediaRecorder) return
-    mediaRecorder.stop()
-    setRecording(false)
+    try {
+      // Flush last data chunk before stopping
+      if (typeof mediaRecorder.requestData === 'function') {
+        try { mediaRecorder.requestData() } catch {}
+      }
+      mediaRecorder.stop()
+    } catch (e) {
+      console.error('Failed to stop recorder', e)
+    } finally {
+      setRecording(false)
+    }
   }
 
   const download = () => {
