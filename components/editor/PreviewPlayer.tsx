@@ -229,7 +229,7 @@ export default React.forwardRef(function PreviewPlayer(
           <video ref={videoRef} className="w-full h-full" controls={false} preload="metadata" />
         </div>
         <div className="p-3 flex items-center gap-3">
-          <Button size="sm" variant="secondary" onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</Button>
+          <Button size="sm" variant="subtle" onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</Button>
           <div className="text-xs tabular-nums text-muted">{formatTime(currentGlobalSeconds)} / {formatTime(totalDuration || 0)}</div>
           <div className="flex-1">
             <div className="h-2 w-full rounded-full bg-[#1a1b1e] cursor-pointer" onClick={onScrubClick}>
