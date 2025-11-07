@@ -165,6 +165,32 @@ export interface Database {
           updated_at?: string
         }
       }
+      edits: {
+        Row: {
+          id: string
+          project_id: string
+          video_id: string | null
+          edl: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          video_id?: string | null
+          edl?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          video_id?: string | null
+          edl?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }

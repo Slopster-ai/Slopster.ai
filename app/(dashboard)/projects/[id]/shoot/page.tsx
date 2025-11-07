@@ -2,6 +2,7 @@ import { Container } from '@/components/ui/Container'
 import Recorder from '@/components/Recorder'
 import { getUser } from '@/lib/supabase/auth'
 import { redirect } from 'next/navigation'
+import ContinueToEdit from '@/components/ContinueToEdit'
 
 export default async function ShootPage({ params }: { params: { id: string } }) {
   const user = await getUser()
@@ -15,10 +16,12 @@ export default async function ShootPage({ params }: { params: { id: string } }) 
           <p className="text-sm text-muted mt-1">Record directly in the browser, then upload to your project.</p>
         </div>
         <Recorder projectId={params.id} />
+        <ContinueToEdit projectId={params.id} />
       </div>
     </Container>
   )
 }
+
 
 
 

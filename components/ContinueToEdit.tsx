@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from './ui/Button'
 import { useRouter } from 'next/navigation'
 
-export default function ContinueToShoot({ projectId }: { projectId: string }) {
+export default function ContinueToEdit({ projectId }: { projectId: string }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -16,11 +16,11 @@ export default function ContinueToShoot({ projectId }: { projectId: string }) {
       const res = await fetch(`/api/projects/${projectId}/flow`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flow_stage: 3 }),
+        body: JSON.stringify({ flow_stage: 4 }),
       })
       const j = await res.json()
       if (!res.ok) throw new Error(j.error || 'Failed to update flow')
-      router.push(`/projects/${projectId}/shoot`)
+      router.push(`/projects/${projectId}/edit`)
     } catch (e: any) {
       setError(e.message || 'Failed to continue')
     } finally {
@@ -30,19 +30,10 @@ export default function ContinueToShoot({ projectId }: { projectId: string }) {
 
   return (
     <div className="mt-6 space-y-2">
-      <Button onClick={onClick} disabled={loading}>{loading ? 'Continuing…' : 'Continue to Shoot'}</Button>
+      <Button onClick={onClick} disabled={loading}>{loading ? 'Continuing…' : 'Continue to Edit'}</Button>
       {error && <div className="text-xs text-red-500">{error}</div>}
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
 
 

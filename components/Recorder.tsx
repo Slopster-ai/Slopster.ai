@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { Button } from './ui/Button'
+import { LiveGuidance } from './LiveGuidance'
 
 export default function Recorder({ projectId }: { projectId: string }) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
@@ -135,8 +136,9 @@ export default function Recorder({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-4">
       {error && <div className="text-sm text-red-500">{error}</div>}
-      <div className="rounded-xl overflow-hidden bg-black aspect-video">
+      <div className="rounded-xl overflow-hidden bg-black aspect-video relative">
         <video ref={videoRef} className="w-full h-full object-contain" autoPlay muted playsInline />
+        <LiveGuidance stream={stream} />
       </div>
       <div className="flex gap-3">
         {!recording ? (

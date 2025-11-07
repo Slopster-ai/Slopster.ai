@@ -10,6 +10,10 @@ export function ProjectStepper({ projectId, flowStage }: { projectId: string; fl
     { step: 1, label: 'Idea & Strategy', href: `/projects/${projectId}/strategy` },
     { step: 2, label: 'Script', href: `/projects/${projectId}` },
     { step: 3, label: 'Shoot', href: `/projects/${projectId}/shoot` },
+    { step: 4, label: 'Edit', href: `/projects/${projectId}/edit` },
+    { step: 5, label: 'Sound', href: `/projects/${projectId}/sound` },
+    { step: 6, label: 'Post', href: `/projects/${projectId}/post` },
+    { step: 7, label: 'Analyze', href: `/projects/${projectId}/analyze` },
   ]
 
   const current = steps.findIndex((s) => pathname.startsWith(s.href))
