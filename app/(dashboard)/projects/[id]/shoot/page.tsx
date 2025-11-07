@@ -22,3 +22,10 @@ export default async function ShootPage({ params }: { params: { id: string } }) 
 
 
 
+
+
+
+
+
+
+

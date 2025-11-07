@@ -15,6 +15,7 @@
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
 
 # debug
@@ -36,4 +37,12 @@ next-env.d.ts
 # AWS Lambda
 aws/lambda/*/node_modules
 aws/lambda/*/*.zip
+
+
+# Lambda layer artifacts
+lambda-layer/
+lambda-layer/bin/
+lambda-layer/ffmpeg-*-amd64-static/
+lambda-layer/*.zip
+lambda-layer/*.tar.xz
 

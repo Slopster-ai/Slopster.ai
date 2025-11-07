@@ -108,6 +108,22 @@ export default function Recorder({ projectId }: { projectId: string }) {
       const cj = await created.json()
       if (!created.ok) throw new Error(cj.error || 'Failed to save video')
 
+      // Kick off processing
+      const proc = await fetch('/api/videos/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId,
+          videoId: cj.video.id,
+          inputKey: key,
+          operations: {},
+        }),
+      })
+      if (!proc.ok) {
+        const pj = await proc.json().catch(() => ({}))
+        throw new Error(pj.error || 'Failed to start processing')
+      }
+
       window.location.reload()
     } catch (e: any) {
       setError(e.message || 'Upload failed')

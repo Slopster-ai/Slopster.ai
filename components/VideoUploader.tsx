@@ -76,10 +76,38 @@ export default function VideoUploader({ projectId }: VideoUploaderProps) {
 
       xhr.addEventListener('load', async () => {
         if (xhr.status === 200) {
-          // File uploaded successfully
-          // TODO: Save video record to database
-          setProgress(100)
-          window.location.reload()
+          try {
+            // Save video record
+            const created = await fetch('/api/videos/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ projectId, key }),
+            })
+            const cj = await created.json()
+            if (!created.ok) throw new Error(cj.error || 'Failed to save video')
+
+            // Start processing
+            const proc = await fetch('/api/videos/process', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                projectId,
+                videoId: cj.video.id,
+                inputKey: key,
+                operations: {},
+              }),
+            })
+            if (!proc.ok) {
+              const pj = await proc.json().catch(() => ({}))
+              throw new Error(pj.error || 'Failed to start processing')
+            }
+
+            setProgress(100)
+            window.location.reload()
+          } catch (e: any) {
+            setError(e.message || 'Post-upload steps failed')
+            setUploading(false)
+          }
         } else {
           throw new Error('Upload failed')
         }
