@@ -30,7 +30,24 @@ export default function Recorder({ projectId }: { projectId: string }) {
           videoRef.current.srcObject = s
         }
       } catch (e: any) {
-        setError(e.message || 'Camera/microphone access denied')
+        console.error('Camera access error:', e)
+        let errorMessage = 'Camera/microphone access failed'
+
+        if (e.name === 'NotAllowedError') {
+          errorMessage = 'Camera/microphone access denied. Please allow permissions and refresh.'
+        } else if (e.name === 'NotFoundError') {
+          errorMessage = 'No camera or microphone found.'
+        } else if (e.name === 'NotReadableError') {
+          errorMessage = 'Camera/microphone is already in use by another application.'
+        } else if (e.name === 'OverconstrainedError') {
+          errorMessage = 'Camera/microphone doesn\'t meet requirements.'
+        } else if (e.name === 'SecurityError') {
+          errorMessage = 'Camera/microphone access blocked for security reasons.'
+        } else if (e.name === 'AbortError') {
+          errorMessage = 'Camera/microphone access was interrupted.'
+        }
+
+        setError(errorMessage)
       }
     }
     init()
@@ -44,18 +61,60 @@ export default function Recorder({ projectId }: { projectId: string }) {
     if (!stream) return
     setError(null)
     setRecordedBlob(null)
-    const mr = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9,opus' })
+
+    // Try different MIME types in order of preference
+    const mimeTypes = [
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm',
+      'video/mp4',
+      ''
+    ]
+
+    let mr: MediaRecorder | null = null
+    let selectedMimeType = ''
+
+    for (const mimeType of mimeTypes) {
+      try {
+        if (mimeType === '' || MediaRecorder.isTypeSupported(mimeType)) {
+          mr = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream)
+          selectedMimeType = mimeType || 'default'
+          break
+        }
+      } catch (e) {
+        continue
+      }
+    }
+
+    if (!mr) {
+      setError('Recording not supported in this browser')
+      return
+    }
+
+    console.log('Using MIME type:', selectedMimeType)
+
     setChunks([])
     mr.ondataavailable = (e) => {
       if (e.data && e.data.size > 0) setChunks((c) => [...c, e.data])
     }
     mr.onstop = () => {
-      const blob = new Blob(chunks, { type: 'video/webm' })
+      const blob = new Blob(chunks, { type: selectedMimeType || 'video/webm' })
       setRecordedBlob(blob)
     }
-    mr.start()
-    setMediaRecorder(mr)
-    setRecording(true)
+    mr.onerror = (e) => {
+      console.error('MediaRecorder error:', e)
+      setError('Recording failed')
+      setRecording(false)
+    }
+
+    try {
+      mr.start()
+      setMediaRecorder(mr)
+      setRecording(true)
+    } catch (e: any) {
+      console.error('Failed to start recording:', e)
+      setError(`Failed to start recording: ${e.message}`)
+    }
   }
 
   const stopRecording = () => {
@@ -79,7 +138,7 @@ export default function Recorder({ projectId }: { projectId: string }) {
     setUploading(true)
     setError(null)
     try {
-      const fileName = `recording-${Date.now()}.webm`
+      const fileName = `recording-${Date.now()}.${recordedBlob.type.includes('mp4') ? 'mp4' : 'webm'}`
       const contentType = recordedBlob.type || 'video/webm'
       const fileSize = recordedBlob.size
       const presign = await fetch('/api/videos/upload', {
