@@ -9,6 +9,7 @@ import { Container } from '@/components/ui/Container'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Progress } from '@/components/ui/Progress'
+import JobProgress from '@/components/JobProgress'
 import ProjectSettings from '@/components/ProjectSettings'
 
 export default async function ProjectPage({ params }: { params: { id: string } }) {
@@ -127,10 +128,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
                       </div>
                       {video.jobs && video.jobs.length > 0 && (
                         <div className="mt-2">
-                          <div className="text-xs text-muted mb-1">
-                            Progress: {video.jobs[0].progress}%
-                          </div>
-                          <Progress value={video.jobs[0].progress} />
+                          <JobProgress jobId={video.jobs[0].id} />
                         </div>
                       )}
                     </div>

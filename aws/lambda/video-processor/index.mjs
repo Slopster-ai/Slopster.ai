@@ -15,6 +15,23 @@ export const handler = async (event) => {
     const message = JSON.parse(record.body)
     const { jobId, inputKey, outputKey, operations } = message
 
+    // Lookup job to get video_id for updating videos table on completion
+    let videoId = null
+    try {
+      const { data: jobRow, error: jobFetchError } = await supabase
+        .from('jobs')
+        .select('video_id')
+        .eq('id', jobId)
+        .single()
+      if (jobFetchError) {
+        console.warn(`Job ${jobId}: Could not fetch job row for video_id`, jobFetchError)
+      } else {
+        videoId = jobRow?.video_id || null
+      }
+    } catch (e) {
+      console.warn(`Job ${jobId}: Failed to lookup video_id`, e)
+    }
+
     try {
       // Update job status: processing
       await supabase
@@ -86,6 +103,18 @@ export const handler = async (event) => {
           updated_at: new Date().toISOString(),
         })
         .eq('id', jobId)
+
+      // Also update related video if we have the id
+      if (videoId) {
+        await supabase
+          .from('videos')
+          .update({
+            status: 'completed',
+            processed_url: outputUrl,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', videoId)
+      }
 
       console.log(`Job ${jobId}: Completed successfully`)
     } catch (error) {
