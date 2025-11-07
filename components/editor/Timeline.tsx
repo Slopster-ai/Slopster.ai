@@ -7,11 +7,15 @@ export default function Timeline({
   timeline,
   setTimeline,
   onSelect,
+  playheadFraction,
+  onSeekFraction,
 }: {
   videos: Array<{ id: string }>
   timeline: string[]
   setTimeline: (next: string[]) => void
   onSelect: (videoId: string) => void
+  playheadFraction?: number
+  onSeekFraction?: (fraction: number) => void
 }) {
   const onDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     e.dataTransfer.setData('text/plain', id)
@@ -27,10 +31,20 @@ export default function Timeline({
   }
   const onDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault()
 
+  const onContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!onSeekFraction) return
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+    const frac = (e.clientX - rect.left) / rect.width
+    onSeekFraction(Math.max(0, Math.min(1, frac)))
+  }
+
   return (
     <div className="space-y-3">
       <h2 className="text-lg font-medium">Timeline</h2>
-      <div className="rounded-xl hairline p-3 min-h-[96px] flex gap-2 items-center overflow-x-auto">
+      <div
+        className="rounded-xl hairline p-3 min-h-[96px] flex gap-2 items-center overflow-x-auto relative"
+        onClick={onContainerClick}
+      >
         {timeline.length === 0 && (
           <div className="text-sm text-muted">Drag videos here to build your edit</div>
         )}
@@ -48,6 +62,13 @@ export default function Timeline({
           </div>
         ))}
         <div className="h-16 min-w-[40px]" onDrop={(e) => onDrop(e, timeline.length)} onDragOver={onDragOver} />
+        {/* Playhead */}
+        {typeof playheadFraction === 'number' && (
+          <div
+            className="absolute top-2 bottom-2 w-px bg-foreground/60 pointer-events-none"
+            style={{ left: `${Math.max(0, Math.min(1, playheadFraction || 0)) * 100}%` }}
+          />
+        )}
       </div>
     </div>
   )

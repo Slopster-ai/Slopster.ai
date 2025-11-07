@@ -4,6 +4,7 @@ import * as React from 'react'
 import ProjectBin from './ProjectBin'
 import Timeline from './Timeline'
 import TranscriptEditor from './TranscriptEditor'
+import PreviewPlayer, { PreviewPlayerHandle } from './PreviewPlayer'
 
 interface VideoItem {
   id: string
@@ -17,6 +18,8 @@ export default function EditorClient({ projectId, initialVideos }: { projectId: 
   const [videos, setVideos] = React.useState<VideoItem[]>(initialVideos)
   const [timeline, setTimeline] = React.useState<string[]>([])
   const [selectedVideoId, setSelectedVideoId] = React.useState<string | null>(null)
+  const [playheadFraction, setPlayheadFraction] = React.useState(0)
+  const previewRef = React.useRef<PreviewPlayerHandle | null>(null)
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -33,11 +36,23 @@ export default function EditorClient({ projectId, initialVideos }: { projectId: 
         />
       </div>
       <div className="lg:col-span-2 space-y-6">
+        <PreviewPlayer
+          ref={previewRef}
+          videos={videos}
+          timeline={timeline}
+          selectedClipId={selectedVideoId}
+          onPlayheadFractionChange={setPlayheadFraction}
+        />
         <Timeline
           videos={videos}
           timeline={timeline}
           setTimeline={setTimeline}
-          onSelect={(vid) => setSelectedVideoId(vid)}
+          onSelect={(vid) => {
+            setSelectedVideoId(vid)
+            previewRef.current?.seekToClipId(vid)
+          }}
+          playheadFraction={playheadFraction}
+          onSeekFraction={(f) => previewRef.current?.seekToFraction(f)}
         />
         {selectedVideoId && (
           <TranscriptEditor
