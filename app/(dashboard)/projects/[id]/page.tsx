@@ -30,9 +30,12 @@ export default async function ProjectPage({ params }: { params: { id: string } }
     notFound()
   }
 
-  // If the project hasn't completed Stage 1, send user to Strategy first
+  // Redirect to appropriate stage based on flow_stage
   if ((project as any).flow_stage && (project as any).flow_stage < 2) {
     redirect(`/projects/${params.id}/strategy`)
+  }
+  if ((project as any).flow_stage >= 4) {
+    redirect(`/projects/${params.id}/edit`)
   }
 
   // Fetch scripts

@@ -1,7 +1,7 @@
-import { Container } from '@/components/ui/Container'
+import { createClient } from '@/lib/supabase/server'
 import { getUser } from '@/lib/supabase/auth'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { Container } from '@/components/ui/Container'
 import Link from 'next/link'
 import ContinueToSound from '@/components/ContinueToSound'
 
