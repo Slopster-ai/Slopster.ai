@@ -67,7 +67,6 @@ export default function Recorder({ projectId }: { projectId: string }) {
       'video/webm;codecs=vp9,opus',
       'video/webm;codecs=vp8,opus',
       'video/webm',
-      'video/mp4',
       ''
     ]
 

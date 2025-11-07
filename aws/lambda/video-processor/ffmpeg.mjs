@@ -9,10 +9,12 @@ import { join } from 'path'
  * @param {Function} progressCallback - Progress callback (0-1)
  * @returns {Promise<Buffer>} - Processed video buffer
  */
-export async function processVideo(inputBuffer, operations, progressCallback) {
+export async function processVideo(inputBuffer, operations, progressCallback, options = {}) {
   const tmpDir = '/tmp'
-  const inputPath = join(tmpDir, `input-${Date.now()}.mp4`)
-  const outputPath = join(tmpDir, `output-${Date.now()}.mp4`)
+  const inputExt = (options.inputExt || 'mp4').replace(/[^a-z0-9]/gi, '')
+  const outputExt = (options.outputExt || 'mp4').replace(/[^a-z0-9]/gi, '')
+  const inputPath = join(tmpDir, `input-${Date.now()}.${inputExt}`)
+  const outputPath = join(tmpDir, `output-${Date.now()}.${outputExt}`)
 
   try {
     // Write input buffer to file

@@ -65,13 +65,15 @@ export const handler = async (event) => {
         .eq('id', jobId)
 
       // Process with FFmpeg
+      const inputExt = inputKey.toLowerCase().endsWith('.webm') ? 'webm' : 'mp4'
+      const outputExt = 'mp4'
       const outputBuffer = await processVideo(inputBuffer, operations, async (progress) => {
         // Update progress during processing
         await supabase
           .from('jobs')
           .update({ progress: 30 + Math.floor(progress * 0.6) })
           .eq('id', jobId)
-      })
+      }, { inputExt, outputExt })
 
       console.log(`Job ${jobId}: Uploading to S3...`)
 
