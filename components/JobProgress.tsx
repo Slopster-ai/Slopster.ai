@@ -114,8 +114,8 @@ export default function JobProgress({ jobId, videoId, onComplete }: JobProgressP
         <p className="text-sm">{job.error}</p>
       )}
 
-      {job.status === 'completed' && job.output_url && (
-        <a href={job.output_url} download className="inline-flex items-center text-sm hover:underline">
+      {job.status === 'completed' && downloadUrl && (
+        <a href={downloadUrl} download className="inline-flex items-center text-sm hover:underline">
           Download video
         </a>
       )}
