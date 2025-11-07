@@ -17,11 +17,19 @@ export async function processVideo(inputBuffer, operations, progressCallback, op
   const outputPath = join(tmpDir, `output-${Date.now()}.${outputExt}`)
 
   try {
+    // Diagnostics
+    try {
+      const head = inputBuffer.subarray(0, 16)
+      console.log('Input buffer bytes:', inputBuffer.length, 'head:', [...head].map(b => b.toString(16).padStart(2, '0')).join(' '))
+    } catch {}
+
     // Write input buffer to file
     writeFileSync(inputPath, inputBuffer)
 
     // Build FFmpeg command
-    const ffmpegArgs = buildFFmpegArgs(inputPath, outputPath, operations)
+    const ffmpegArgs = buildFFmpegArgs(inputPath, outputPath, operations, {
+      forceInputFormat: inputExt === 'webm' ? 'webm' : undefined,
+    })
 
     console.log('FFmpeg command:', ffmpegArgs.join(' '))
 
@@ -68,8 +76,13 @@ export async function processVideo(inputBuffer, operations, progressCallback, op
 /**
  * Build FFmpeg command arguments
  */
-function buildFFmpegArgs(inputPath, outputPath, operations) {
-  const args = ['-i', inputPath]
+function buildFFmpegArgs(inputPath, outputPath, operations, opts = {}) {
+  const args = []
+  if (opts.forceInputFormat) {
+    args.push('-f', opts.forceInputFormat)
+    args.push('-fflags', '+genpts')
+  }
+  args.push('-i', inputPath)
 
   // Trim video
   if (operations.trim) {
