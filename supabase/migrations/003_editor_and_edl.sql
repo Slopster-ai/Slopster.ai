@@ -34,3 +34,4 @@ CREATE POLICY "Users can update own edits" ON public.edits FOR UPDATE USING (
 );
 
 
+

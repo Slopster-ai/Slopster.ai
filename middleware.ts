@@ -8,6 +8,10 @@ export async function middleware(request: NextRequest) {
     },
   })
 
+  const siteClosed =
+    process.env.NEXT_PUBLIC_SITE_CLOSED === 'true' ||
+    process.env.SITE_CLOSED === 'true'
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -57,6 +61,44 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  // If in closed mode, allow only a small set of public pages unless user has beta access
+  if (siteClosed) {
+    const pathname = request.nextUrl.pathname
+
+    // Always-allowed assets and next internals are covered by matcher; allow specific public paths:
+    const publicPaths = ['/', '/waitlist', '/about', '/pricing', '/robots.txt', '/favicon.ico']
+    const isPublicPath = publicPaths.includes(pathname)
+
+    // Shortcut: block auth pages while closed
+    const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/signup')
+    if (isAuthPath) {
+      return NextResponse.redirect(new URL('/waitlist', request.url))
+    }
+
+    // If user is logged in, check beta_access flag
+    let hasBetaAccess = false
+    if (user) {
+      const { data } = await supabase
+        .from('users')
+        .select('beta_access')
+        .eq('id', user.id)
+        .single()
+      hasBetaAccess = Boolean(data?.beta_access)
+    }
+
+    // Allow API routes to handle their own auth (except we keep /api/waitlist open)
+    const isApiPath = pathname.startsWith('/api')
+    const isWaitlistApi = pathname.startsWith('/api/waitlist')
+    if (isApiPath && (hasBetaAccess || isWaitlistApi)) {
+      return response
+    }
+
+    // For non-API, allow only public or beta users
+    if (!isPublicPath && !hasBetaAccess) {
+      return NextResponse.redirect(new URL('/waitlist', request.url))
+    }
+  }
 
   // Protected routes
   const protectedPaths = ['/dashboard', '/projects', '/editor', '/settings']

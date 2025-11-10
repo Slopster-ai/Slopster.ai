@@ -13,6 +13,7 @@ export default async function HomePage() {
     const name = (user.user_metadata as any)?.display_name || (user.email || '').split('@')[0] || 'there'
     return <HomeAuthed displayName={name} />
   }
+  const siteClosed = process.env.NEXT_PUBLIC_SITE_CLOSED === 'true' || process.env.SITE_CLOSED === 'true'
   return (
     <div className="min-h-[calc(100vh-4rem)]">
       {/* Hero: bold, minimal, anchored by logo */}
@@ -27,14 +28,27 @@ export default async function HomePage() {
           more publishing.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Link href="/signup">
-            <Button className="w-full sm:w-auto" size="lg">Start free</Button>
-          </Link>
-          <Link href="/login">
-            <Button variant="ghost" className="w-full sm:w-auto" size="lg">Log in</Button>
-          </Link>
+          {siteClosed ? (
+            <>
+              <Link href="/waitlist">
+                <Button className="w-full sm:w-auto" size="lg">Join the waitlist</Button>
+              </Link>
+              <Link href="/waitlist">
+                <Button variant="ghost" className="w-full sm:w-auto" size="lg">Learn more</Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/signup">
+                <Button className="w-full sm:w-auto" size="lg">Start free</Button>
+              </Link>
+              <Link href="/login">
+                <Button variant="ghost" className="w-full sm:w-auto" size="lg">Log in</Button>
+              </Link>
+            </>
+          )}
         </div>
-        <p className="text-xs text-muted">No credit card required.</p>
+        {!siteClosed && <p className="text-xs text-muted">No credit card required.</p>}
         </Container>
       </section>
 
@@ -74,9 +88,15 @@ export default async function HomePage() {
             <div>
               <h2 className="text-3xl md:text-4xl font-medium">Ship your next short in minutes</h2>
             </div>
-            <Link href="/signup">
-              <Button size="lg">Get started</Button>
-            </Link>
+            {siteClosed ? (
+              <Link href="/waitlist">
+                <Button size="lg">Join the waitlist</Button>
+              </Link>
+            ) : (
+              <Link href="/signup">
+                <Button size="lg">Get started</Button>
+              </Link>
+            )}
           </div>
         </Container>
       </section>
