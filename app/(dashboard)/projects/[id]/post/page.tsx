@@ -1,7 +1,7 @@
 "use client"
 
 import { Container } from '@/components/ui/Container'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 
 export default function PostPage({ params }: { params: { id: string } }) {
@@ -11,7 +11,7 @@ export default function PostPage({ params }: { params: { id: string } }) {
   const [hashtags, setHashtags] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const generate = async () => {
+  const generate = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -29,14 +29,14 @@ export default function PostPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [projectId])
 
   const copyAll = async () => {
     const text = caption + (hashtags.length ? '\n\n' + hashtags.map((h) => (h.startsWith('#') ? h : '#' + h)).join(' ') : '')
     await navigator.clipboard.writeText(text)
   }
 
-  useEffect(() => { generate() }, [])
+  useEffect(() => { generate() }, [generate])
 
   return (
     <Container>

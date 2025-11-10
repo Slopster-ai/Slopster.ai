@@ -45,7 +45,7 @@ export default function WaitlistPage() {
 				<Container className="max-w-xl w-full">
 					<Card className="p-8">
 						<CardHeader>
-							<CardTitle>You're on the list ✅</CardTitle>
+							<CardTitle>You&apos;re on the list ✅</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<p className="text-sm text-muted">

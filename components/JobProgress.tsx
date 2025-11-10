@@ -83,7 +83,7 @@ export default function JobProgress({ jobId, videoId, onComplete }: JobProgressP
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [jobId, supabase, onComplete])
+  }, [jobId, supabase, onComplete, videoId])
 
   if (!job) {
     return (

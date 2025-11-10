@@ -42,6 +42,9 @@ export default function LoginPage() {
 			const mag = Math.min(Math.abs(vx) + Math.abs(vy), 1)
 			return 0.85 + mag * 0.1
 		})
+		// Background illumination transforms
+		const bgX = useTransform(x, (v) => v * 12)
+		const bgY = useTransform(y, (v) => v * 12)
 
   const cardRef = useRef<HTMLDivElement | null>(null)
 
@@ -118,7 +121,7 @@ export default function LoginPage() {
 					{/* Subtle radial illumination behind the card that nudges with tilt */}
 					<motion.div
 						aria-hidden
-						style={prefersReducedMotion ? {} : { x: useTransform(x, (v) => v * 12), y: useTransform(y, (v) => v * 12) }}
+						style={prefersReducedMotion ? {} : { x: bgX, y: bgY }}
 						className="pointer-events-none absolute -inset-8 -z-10 rounded-[28px] bg-[radial-gradient(380px_220px_at_20%_10%,rgba(255,255,255,0.06),transparent_60%)] blur-2xl"
 					/>
           <motion.div

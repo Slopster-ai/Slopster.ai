@@ -154,7 +154,7 @@ export default React.forwardRef(function PreviewPlayer(
     }
   }
 
-  const seekToFraction = (fraction: number) => {
+  const seekToFraction = React.useCallback((fraction: number) => {
     const f = Math.max(0, Math.min(1, fraction))
     // Determine which clip based on cumulative durations
     const target = f * (totalDuration || 1)
@@ -183,9 +183,9 @@ export default React.forwardRef(function PreviewPlayer(
       onPlayheadFractionChange?.(f)
       if (isPlaying) v.play().catch(() => {})
     })
-  }
+  }, [totalDuration, timeline, durations, setCurrentIndex, setPlayheadFraction, onPlayheadFractionChange, isPlaying])
 
-  const seekToClipId = (clipId: string) => {
+  const seekToClipId = React.useCallback((clipId: string) => {
     const idx = timeline.indexOf(clipId)
     if (idx < 0) return
     setCurrentIndex(idx)
@@ -195,9 +195,9 @@ export default React.forwardRef(function PreviewPlayer(
       v.currentTime = 0
       if (isPlaying) v.play().catch(() => {})
     })
-  }
+  }, [timeline, setCurrentIndex, isPlaying])
 
-  React.useImperativeHandle(ref, () => ({ seekToFraction, seekToClipId }), [seekToFraction])
+  React.useImperativeHandle(ref, () => ({ seekToFraction, seekToClipId }), [seekToFraction, seekToClipId])
 
   // If selected clip changes externally, seek to it
   React.useEffect(() => {
