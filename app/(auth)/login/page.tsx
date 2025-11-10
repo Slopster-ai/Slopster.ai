@@ -28,17 +28,17 @@ export default function LoginPage() {
 		const reflectX = useTransform(x, [-0.5, 0.5], [16, -16])
 		const reflectY = useTransform(y, [-0.5, 0.5], [16, -16])
 		// Opacity subtly increases with tilt magnitude
-		const reflectOpacity = useTransform([x, y], ([vx, vy]: [number, number]) => {
+		const reflectOpacity = useTransform([x, y], (vx: number, vy: number) => {
 			const mag = Math.min(Math.abs(vx) + Math.abs(vy), 1)
 			return 0.18 + mag * 0.12
 		})
 		// Text illumination: brighten when tilting toward top-left (light source)
-		const textBrightnessValue = useTransform([x, y], ([vx, vy]: [number, number]) => {
+		const textBrightnessValue = useTransform([x, y], (vx: number, vy: number) => {
 			const towardTL = Math.max(0, (-vx + -vy) * 0.6)
 			return 0.95 + Math.min(towardTL, 0.15)
 		})
 		const textBrightness = useTransform(textBrightnessValue, (b) => `brightness(${b})`)
-		const textOpacity = useTransform([x, y], ([vx, vy]: [number, number]) => {
+		const textOpacity = useTransform([x, y], (vx: number, vy: number) => {
 			const mag = Math.min(Math.abs(vx) + Math.abs(vy), 1)
 			return 0.85 + mag * 0.1
 		})
