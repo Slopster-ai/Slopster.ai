@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -15,18 +15,37 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => {
+    try {
+      return createClient()
+    } catch (error) {
+      return null
+    }
+  }, [])
+
+  // Get the site URL from environment variable or fallback to current origin
+  const getSiteUrl = () => {
+    if (typeof window !== 'undefined') {
+      return process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+    }
+    return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  }
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase) {
+      setError('Supabase client not available. Please refresh the page.')
+      return
+    }
     setLoading(true)
     setError(null)
 
+    const siteUrl = getSiteUrl()
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/welcome`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=/welcome`,
       },
     })
 
@@ -45,13 +64,18 @@ export default function SignupPage() {
   }
 
   const handleGoogleSignup = async () => {
+    if (!supabase) {
+      setError('Supabase client not available. Please refresh the page.')
+      return
+    }
     setLoading(true)
     setError(null)
 
+    const siteUrl = getSiteUrl()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/welcome`,
+        redirectTo: `${siteUrl}/auth/callback?next=/welcome`,
       },
     })
 

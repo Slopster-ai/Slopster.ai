@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Container } from '@/components/ui/Container'
@@ -9,13 +9,23 @@ import { Label, Input } from '@/components/ui/Form'
 import { Button } from '@/components/ui/Button'
 
 export default function WelcomePage() {
-  const supabase = createClient()
+  const supabase = useMemo(() => {
+    try {
+      return createClient()
+    } catch (error) {
+      return null
+    }
+  }, [])
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!supabase) {
+      router.replace('/login')
+      return
+    }
     let mounted = true
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!mounted) return
@@ -38,6 +48,10 @@ export default function WelcomePage() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
+    if (!supabase) {
+      setError('Supabase client not available. Please refresh the page.')
+      return
+    }
     setError(null)
     if (!name.trim()) return
     try {

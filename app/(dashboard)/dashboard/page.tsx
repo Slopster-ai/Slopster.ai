@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button'
 import { Folder } from 'lucide-react'
 import NewProjectButton from '@/components/NewProjectButton'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const user = await getUser()
   if (!user) redirect('/login')

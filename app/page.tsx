@@ -7,6 +7,8 @@ import { Bot, Scissors, Gauge } from 'lucide-react'
 import { getUser } from '../lib/supabase/auth'
 import HomeAuthed from '../components/HomeAuthed'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const user = await getUser()
   if (user) {

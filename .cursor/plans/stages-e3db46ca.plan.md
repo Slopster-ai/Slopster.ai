@@ -10,7 +10,7 @@
 ## Stage 3: Shoot (real-time guidance)
 
 - Live guidance overlays: brightness (canvas luminance), framing (face detection), energy (WebAudio rms/speaking rate), orientation check.
-- CTAs: Primary “Continue to Edit” → `PUT /api/projects/[id]/flow` to 4 → `/projects/{id}/edit`; Secondary “Skip recording”.
+- CTAs: Primary “Continue to Edit” → `PUT /api/projects/[id]/flow `to 4 → `/projects/{id}/edit`; Secondary “Skip recording”.
 - Integration: after upload, we already create a `videos` row; Editor will seed with the latest video; use `LiveGuidance` (lazy-loaded) inside `Recorder`.
 
 ## Stage 4: Editor (CapCut-style MVP)

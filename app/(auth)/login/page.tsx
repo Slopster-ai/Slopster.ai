@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -9,7 +9,15 @@ import { ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => {
+    try {
+      return createClient()
+    } catch (error) {
+      // During build, env vars might not be available
+      // Return null and handle in useEffect
+      return null
+    }
+  }, [])
 
   // Form state
   const [email, setEmail] = useState('')
@@ -61,15 +69,28 @@ export default function LoginPage() {
     mvY.set(0)
   }
 
+  // Get the site URL from environment variable or fallback to current origin
+  const getSiteUrl = () => {
+    if (typeof window !== 'undefined') {
+      return process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+    }
+    return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  }
+
   // Supabase handlers (email magic link + OAuth)
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase) {
+      setError('Supabase client not available. Please refresh the page.')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
+      const siteUrl = getSiteUrl()
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: { emailRedirectTo: `${siteUrl}/auth/callback` },
       })
       if (error) throw error
       router.push('/welcome')
@@ -82,11 +103,16 @@ export default function LoginPage() {
   }
 
   const handleGoogle = async () => {
+    if (!supabase) {
+      setError('Supabase client not available. Please refresh the page.')
+      return
+    }
     setLoading(true)
     setError(null)
+    const siteUrl = getSiteUrl()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${siteUrl}/auth/callback` },
     })
     if (error) {
       setError(error.message)
@@ -95,11 +121,16 @@ export default function LoginPage() {
   }
 
   const handleX = async () => {
+    if (!supabase) {
+      setError('Supabase client not available. Please refresh the page.')
+      return
+    }
     setLoading(true)
     setError(null)
+    const siteUrl = getSiteUrl()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'twitter', // X
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${siteUrl}/auth/callback` },
     })
     if (error) {
       setError(error.message)

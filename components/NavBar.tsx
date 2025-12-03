@@ -12,10 +12,21 @@ import { createClient as createSupabaseClient } from '../lib/supabase/client'
 export default function NavBar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = useMemo(() => createSupabaseClient(), [])
+  const supabase = useMemo(() => {
+    try {
+      return createSupabaseClient()
+    } catch (error) {
+      // During build, env vars might not be available
+      return null
+    }
+  }, [])
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null)
 
   useEffect(() => {
+    if (!supabase) {
+      setIsAuthed(false)
+      return
+    }
     let mounted = true
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (mounted) setIsAuthed(!!user)
@@ -30,6 +41,7 @@ export default function NavBar() {
   }, [supabase])
 
   async function handleSignOut() {
+    if (!supabase) return
     await supabase.auth.signOut()
     router.push('/')
   }
