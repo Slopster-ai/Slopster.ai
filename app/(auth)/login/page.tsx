@@ -72,7 +72,18 @@ export default function LoginPage() {
   // Get the site URL from environment variable or fallback to current origin
   const getSiteUrl = () => {
     if (typeof window !== 'undefined') {
-      return process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+      // Use env var if available, otherwise check if we're on production domain
+      const envUrl = process.env.NEXT_PUBLIC_SITE_URL
+      if (envUrl) return envUrl
+      
+      // If on production domain, use it
+      const hostname = window.location.hostname
+      if (hostname.includes('vercel.app') || hostname.includes('slopster')) {
+        return window.location.origin
+      }
+      
+      // Fallback to current origin
+      return window.location.origin
     }
     return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   }

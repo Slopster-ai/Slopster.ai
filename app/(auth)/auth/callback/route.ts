@@ -6,7 +6,8 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/dashboard'
 
-  // Use environment variable for site URL if available, otherwise use request origin
+  // Determine the correct site URL
+  // Priority: 1. Environment variable, 2. Request origin
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin
 
   if (code) {
