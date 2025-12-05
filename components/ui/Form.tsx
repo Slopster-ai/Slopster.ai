@@ -45,7 +45,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
     <select
       ref={ref}
       className={clsx(
-        'w-full rounded-xl bg-[#0e0f11] text-foreground hairline px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring',
+        'w-full rounded-xl bg-[#0e0f11] text-foreground hairline pl-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-ring',
         className
       )}
       {...props}

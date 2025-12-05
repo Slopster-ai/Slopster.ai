@@ -12,9 +12,25 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SITE_CLOSED === 'true' ||
     process.env.SITE_CLOSED === 'true'
 
+  // Skip Supabase auth if env vars are missing (for local dev)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseKey) {
+    // Allow public paths, redirect protected paths to login
+    const protectedPaths = ['/dashboard', '/projects', '/editor', '/settings']
+    const isProtectedPath = protectedPaths.some((path) =>
+      request.nextUrl.pathname.startsWith(path)
+    )
+    if (isProtectedPath) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    return response
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         get(name: string) {

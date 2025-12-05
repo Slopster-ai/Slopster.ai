@@ -40,15 +40,17 @@ export default function PricingPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="relative border-2 border-amber-400/60 bg-gradient-to-br from-amber-500/10 via-yellow-500/8 to-amber-600/10 shadow-[0_0_40px_rgba(251,191,36,0.25),0_8px_32px_rgba(234,179,8,0.15),inset_0_1px_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(234,179,8,0.15)] backdrop-blur-sm">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-400/10 via-transparent to-yellow-500/10 pointer-events-none" />
             <CardHeader>
-              <CardTitle>Team</CardTitle>
+              <CardTitle className="underline decoration-amber-400 decoration-3 underline-offset-4 text-amber-200 font-semibold">Pro</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-muted">
-                <li>• Collaboration</li>
-                <li>• Priority processing</li>
-                <li>• Admin tools</li>
+                <li>• Fastest processing</li>
+                <li>• 4k availability</li>
+                <li>• Access to our best services</li>
+                <li>• 24/7 customer help</li>
               </ul>
               <Button className="mt-6 w-full" variant="subtle">Contact us</Button>
             </CardContent>

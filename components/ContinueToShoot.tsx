@@ -30,7 +30,7 @@ export default function ContinueToShoot({ projectId }: { projectId: string }) {
 
   return (
     <div className="mt-6 space-y-2">
-      <Button onClick={onClick} disabled={loading}>{loading ? 'Continuing…' : 'Continue to Shoot'}</Button>
+      <Button onClick={onClick} disabled={loading}>{loading ? 'Continuing…' : 'Continue to Record'}</Button>
       {error && <div className="text-xs text-red-500">{error}</div>}
     </div>
   )

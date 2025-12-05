@@ -6,8 +6,7 @@ import { Container } from '../components/ui/Container'
 import { Bot, Scissors, Gauge } from 'lucide-react'
 import { getUser } from '../lib/supabase/auth'
 import HomeAuthed from '../components/HomeAuthed'
-
-export const dynamic = 'force-dynamic'
+import HeroGlassCard from '../components/HeroGlassCard'
 
 export default async function HomePage() {
   const user = await getUser()
@@ -21,36 +20,38 @@ export default async function HomePage() {
       {/* Hero: bold, minimal, anchored by logo */}
       <section className="flex flex-col items-center gap-8 pt-24 pb-20 text-center">
         <Container className="flex flex-col items-center gap-8">
-        <Image src={Logo} alt="Slopster" className="opacity-90" priority />
-        <h1 className="text-5xl md:text-7xl font-medium tracking-wide2 max-w-4xl">
-          Make content people actually watch.
-        </h1>
-        <p className="max-w-2xl text-lg text-muted">
-          Turn rough takes into crisp, captioned, algorithm-friendly shorts. Less polishing,
-          more publishing.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          {siteClosed ? (
-            <>
-              <Link href="/waitlist">
-                <Button className="w-full sm:w-auto" size="lg">Join the waitlist</Button>
-              </Link>
-              <Link href="/waitlist">
-                <Button variant="ghost" className="w-full sm:w-auto" size="lg">Learn more</Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/signup">
-                <Button className="w-full sm:w-auto" size="lg">Start free</Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="ghost" className="w-full sm:w-auto" size="lg">Log in</Button>
-              </Link>
-            </>
-          )}
-        </div>
-        {!siteClosed && <p className="text-xs text-muted">No credit card required.</p>}
+          <HeroGlassCard>
+            <Image src={Logo} alt="Slopster" className="opacity-90" priority />
+            <h1 className="text-5xl md:text-7xl font-medium tracking-wide2 max-w-4xl">
+              Make content people actually watch.
+            </h1>
+            <p className="max-w-2xl text-lg text-muted">
+              Turn rough takes into crisp, captioned, algorithm-friendly shorts. Less polishing,
+              more publishing.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {siteClosed ? (
+                <>
+                  <Link href="/waitlist">
+                    <Button className="w-full sm:w-auto" size="lg">Join the waitlist</Button>
+                  </Link>
+                  <Link href="/waitlist">
+                    <Button variant="ghost" className="w-full sm:w-auto" size="lg">Learn more</Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/signup">
+                    <Button className="w-full sm:w-auto" size="lg">Start free</Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button variant="ghost" className="w-full sm:w-auto" size="lg">Log in</Button>
+                  </Link>
+                </>
+              )}
+            </div>
+            {!siteClosed && <p className="text-xs text-muted">No credit card required.</p>}
+          </HeroGlassCard>
         </Container>
       </section>
 

@@ -43,21 +43,18 @@ export default function StrategyPage({ params }: { params: { id: string } }) {
     let cancelled = false
     const load = async () => {
       try {
-        const [profileRes, strategyRes] = await Promise.all([
-          fetch('/api/profile/context'),
-          fetch(`/api/projects/${projectId}/strategy`),
-        ])
-        const profile = await profileRes.json()
+        const strategyRes = await fetch(`/api/projects/${projectId}/strategy`)
         const strategy = await strategyRes.json()
 
-        if (!profileRes.ok) throw new Error(profile.error || 'Failed to load profile')
         if (!strategyRes.ok) throw new Error(strategy.error || 'Failed to load strategy')
 
-        const bc = profile.brand_context || {}
-        setBrandVoice(bc.brandVoice || '')
-        setChannelSummary(bc.channelSummary || '')
-
         const sc = strategy.strategy_context || {}
+        
+        // Only load brand context from strategy, not from profile (reset per project)
+        if (sc.brandVoice) setBrandVoice(sc.brandVoice)
+        if (sc.channelSummary) setChannelSummary(sc.channelSummary)
+        
+        // Load strategy-specific fields
         if (sc.purpose) setPurpose(sc.purpose)
         if (sc.audience?.description) setAudienceDesc(sc.audience.description)
         if (sc.platform) setPlatform(sc.platform)
@@ -79,15 +76,10 @@ export default function StrategyPage({ params }: { params: { id: string } }) {
     setSaving(true)
     setError(null)
     try {
-      // Save brand context
-      await fetch('/api/profile/context', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ brand_context: { brandVoice, channelSummary } }),
-      })
-
-      // Save strategy
+      // Save strategy (including brand context per project)
       const strategy_context = {
+        brandVoice,
+        channelSummary,
         platform,
         purpose,
         audience: { description: audienceDesc },
@@ -171,7 +163,7 @@ export default function StrategyPage({ params }: { params: { id: string } }) {
 
   return (
     <Container>
-      <div className="py-10 max-w-3xl">
+      <div className="py-10">
         <div className="mb-6">
           <h1 className="text-3xl font-medium">Stage 1: Idea & Strategy</h1>
           <p className="text-sm text-muted mt-1">Define your audience and purpose, then generate and select an idea.</p>
@@ -185,69 +177,111 @@ export default function StrategyPage({ params }: { params: { id: string } }) {
           <div className="text-sm text-muted">Loading…</div>
         ) : (
           <div className="space-y-8">
-            <section className="space-y-4">
-              <h2 className="text-lg font-semibold">Brand context</h2>
-              <div>
-                <Label className="mb-1" htmlFor="brandVoice">Brand voice</Label>
-                <Input id="brandVoice" value={brandVoice} onChange={(e) => setBrandVoice(e.target.value)} placeholder="e.g., friendly, witty, expert" />
-              </div>
-              <div>
-                <Label className="mb-1" htmlFor="channelSummary">Channel summary</Label>
-                <Textarea id="channelSummary" rows={3} value={channelSummary} onChange={(e) => setChannelSummary(e.target.value)} placeholder="What is your channel about?" />
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-lg font-semibold">Audience & purpose</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label className="mb-1" htmlFor="purpose">Purpose</Label>
-                  <Select id="purpose" value={purpose} onChange={(e) => setPurpose(e.target.value)}>
-                    <option value="education">Education</option>
-                    <option value="entertainment">Entertainment</option>
-                    <option value="promotion">Promotion</option>
-                    <option value="storytelling">Storytelling</option>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="mb-1" htmlFor="platform">Platform</Label>
-                  <Select id="platform" value={platform} onChange={(e) => setPlatform(e.target.value as any)}>
-                    <option value="tiktok">TikTok</option>
-                    <option value="youtube-shorts">YouTube Shorts</option>
-                    <option value="instagram-reels">Instagram Reels</option>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <Label className="mb-1" htmlFor="audience">Who is this for?</Label>
-                <Textarea id="audience" rows={3} value={audienceDesc} onChange={(e) => setAudienceDesc(e.target.value)} placeholder="Describe your target audience, their main points and level." />
-              </div>
-            </section>
-
-            <section className="space-y-4">
-              <h2 className="text-lg font-semibold">Idea assistant</h2>
-              <IdeaAssistant
-                platform={platform}
-                brandContext={{ brandVoice, channelSummary }}
-                purpose={purpose}
-                audience={{ description: audienceDesc }}
-                constraints={constraints}
-                onSelect={(idea) => setSelectedIdea(idea as any)}
-              />
-              {selectedIdea && (
-                <div className="rounded-xl hairline p-4 bg-surface">
-                  <div className="text-sm text-muted mb-2">Selected idea</div>
-                  <div className="font-medium">{selectedIdea.title}</div>
-                  <div className="text-sm text-muted mt-1">Hook: {selectedIdea.hook}</div>
-                </div>
-              )}
-            </section>
-
-            <div className="flex gap-3">
-              <Button onClick={handleSave} disabled={saving}>Save</Button>
-              <Button onClick={handleContinue} disabled={saving || !selectedIdea}>
+            <div className="flex gap-3 w-full">
+              <Button onClick={handleSave} disabled={saving} className="flex-1">Save</Button>
+              <Button onClick={handleContinue} disabled={saving || !selectedIdea} className="flex-1">
                 Continue to Script
               </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-4 space-y-8">
+                <section className="space-y-4">
+                  <h2 className="text-lg font-semibold">Brand context</h2>
+                <div>
+                  <Label className="mb-1" htmlFor="brandVoice">Brand voice</Label>
+                  <Select id="brandVoice" value={brandVoice} onChange={(e) => setBrandVoice(e.target.value)}>
+                    <option value="">Select a brand voice</option>
+                    <option value="friendly">Friendly</option>
+                    <option value="formal">Formal</option>
+                    <option value="expert">Expert</option>
+                    <option value="professional">Professional</option>
+                    <option value="casual">Casual</option>
+                    <option value="witty">Witty</option>
+                    <option value="inspirational">Inspirational</option>
+                    <option value="conversational">Conversational</option>
+                    <option value="authoritative">Authoritative</option>
+                    <option value="playful">Playful</option>
+                    <option value="empathetic">Empathetic</option>
+                    <option value="confident">Confident</option>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="mb-1" htmlFor="channelSummary">Channel summary</Label>
+                  <Textarea id="channelSummary" rows={3} value={channelSummary} onChange={(e) => setChannelSummary(e.target.value)} placeholder="What is your channel about?" />
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <h2 className="text-lg font-semibold">Audience & purpose</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="mb-1" htmlFor="purpose">Purpose</Label>
+                    <Select id="purpose" value={purpose} onChange={(e) => setPurpose(e.target.value)}>
+                      <option value="education">Education</option>
+                      <option value="entertainment">Entertainment</option>
+                      <option value="promotion">Promotion</option>
+                      <option value="storytelling">Storytelling</option>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="mb-1" htmlFor="platform">Platform</Label>
+                    <Select id="platform" value={platform} onChange={(e) => setPlatform(e.target.value as any)}>
+                      <option value="tiktok">TikTok</option>
+                      <option value="youtube-shorts">YouTube Shorts</option>
+                      <option value="instagram-reels">Instagram Reels</option>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label className="mb-1" htmlFor="audience">Who is this for?</Label>
+                  <Textarea id="audience" rows={3} value={audienceDesc} onChange={(e) => setAudienceDesc(e.target.value)} placeholder="Describe your target audience, also add your main points. It would also be helpful to describe their level of understanding." />
+                </div>
+              </section>
+              </div>
+
+              <div className="lg:col-span-4 lg:border-l lg:border-white/10 lg:pl-8">
+                <section className="space-y-4">
+                  <IdeaAssistant
+                    platform={platform}
+                    brandContext={{ brandVoice, channelSummary }}
+                    purpose={purpose}
+                    audience={{ description: audienceDesc }}
+                    constraints={constraints}
+                    onSelect={(idea) => setSelectedIdea(idea as any)}
+                    selectedIdea={selectedIdea}
+                  />
+                </section>
+              </div>
+
+              <div className="lg:col-span-4 lg:border-l lg:border-white/10 lg:pl-8">
+                {selectedIdea && (
+                  <div className="rounded-xl hairline p-4 bg-surface">
+                    <div className="text-sm text-muted mb-2">Selected idea</div>
+                    <div className="font-medium">{selectedIdea.title}</div>
+                    <div className="text-sm text-muted mt-1">Hook: {selectedIdea.hook}</div>
+                    {selectedIdea.angle && (
+                      <div className="text-sm text-muted mt-1">Angle: {selectedIdea.angle}</div>
+                    )}
+                    {selectedIdea.durationSec && (
+                      <div className="text-sm text-muted mt-1">Duration: {selectedIdea.durationSec}s</div>
+                    )}
+                    {Array.isArray(selectedIdea.outline) && selectedIdea.outline.length > 0 && (
+                      <div className="mt-3">
+                        <div className="text-xs text-muted mb-1">Outline:</div>
+                        <ul className="list-disc list-inside text-xs text-muted space-y-0.5">
+                          {selectedIdea.outline.map((b: string, i: number) => (
+                            <li key={i}>{b}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {selectedIdea.reasoning && (
+                      <div className="text-xs text-muted mt-3">{selectedIdea.reasoning}</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

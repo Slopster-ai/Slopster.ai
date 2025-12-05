@@ -1,5 +1,5 @@
 import { Container } from '@/components/ui/Container'
-import Recorder from '@/components/Recorder'
+import VoiceRecorder from '@/components/VoiceRecorder'
 import { getUser } from '@/lib/supabase/auth'
 import { redirect } from 'next/navigation'
 import ContinueToEdit from '@/components/ContinueToEdit'
@@ -11,7 +11,7 @@ export default async function ShootPage({ params }: { params: { id: string } }) 
   if (!user) redirect('/login')
   const supabase = await createClient()
 
-  // Fetch recent videos for this project
+  // Fetch recent recordings for this project
   const { data: videos } = await supabase
     .from('videos')
     .select('id, status, metadata, processed_url')
@@ -36,28 +36,28 @@ export default async function ShootPage({ params }: { params: { id: string } }) 
     <Container>
       <div className="py-10 max-w-3xl">
         <div className="mb-6">
-          <h1 className="text-3xl font-medium">Stage 3: Shoot</h1>
-          <p className="text-sm text-muted mt-1">Record directly in the browser, then upload to your project.</p>
+          <h1 className="text-3xl font-medium">Stage 3: Record Voice</h1>
+          <p className="text-sm text-muted mt-1">Record your voice narration, then upload to your project.</p>
         </div>
-        <Recorder projectId={params.id} />
+        <VoiceRecorder projectId={params.id} />
         <div className="mt-8 space-y-3">
-          <h2 className="text-lg font-medium">Recent uploads</h2>
+          <h2 className="text-lg font-medium">Recent recordings</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {previews.map((p) => (
               <div key={p.id} className="p-3 rounded-xl hairline">
                 <div className="text-xs text-muted mb-2 flex items-center justify-between">
-                  <span>Video {p.id.slice(0,8)}</span>
+                  <span>Recording {p.id.slice(0,8)}</span>
                   <span>{p.status}</span>
                 </div>
                 {p.url ? (
-                  <video src={p.url} controls className="w-full rounded-lg" />
+                  <audio src={p.url} controls className="w-full" />
                 ) : (
                   <div className="text-sm text-muted">Preview unavailable</div>
                 )}
               </div>
             ))}
             {previews.length === 0 && (
-              <div className="text-sm text-muted">No uploads yet.</div>
+              <div className="text-sm text-muted">No recordings yet.</div>
             )}
           </div>
         </div>

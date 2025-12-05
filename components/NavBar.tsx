@@ -12,21 +12,10 @@ import { createClient as createSupabaseClient } from '../lib/supabase/client'
 export default function NavBar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = useMemo(() => {
-    try {
-      return createSupabaseClient()
-    } catch (error) {
-      // During build, env vars might not be available
-      return null
-    }
-  }, [])
+  const supabase = useMemo(() => createSupabaseClient(), [])
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null)
 
   useEffect(() => {
-    if (!supabase) {
-      setIsAuthed(false)
-      return
-    }
     let mounted = true
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (mounted) setIsAuthed(!!user)
@@ -41,7 +30,6 @@ export default function NavBar() {
   }, [supabase])
 
   async function handleSignOut() {
-    if (!supabase) return
     await supabase.auth.signOut()
     router.push('/')
   }
@@ -55,14 +43,20 @@ export default function NavBar() {
           {/* Full wordmark on md+, icon on small screens */}
           <Image src={IconLogo} alt="Slopster icon" className="h-7 w-auto md:hidden" priority />
           <Image src={IconLogo} alt="Slopster" className="h-7 w-auto hidden md:block" priority />
-          <span className="sr-only">Slopster</span>
+          <span className="text-base font-semibold text-foreground px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm shadow-md shadow-black/30">
+            Slopster.ai
+          </span>
         </Link>
 
-        <nav className="pointer-events-auto absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:flex items-center gap-8">
-          <Link href="/" className={linkBase + (pathname === '/' ? ' text-foreground' : '')}>Home</Link>
-          <Link href="/dashboard" className={linkBase}>Tools</Link>
-          <Link href="/pricing" className={linkBase}>Pricing</Link>
-          <Link href="/about" className={linkBase}>About</Link>
+        <nav className="pointer-events-auto absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:flex items-center gap-3">
+          <Link href="/" className={`inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm ${
+            pathname === '/' 
+              ? 'bg-foreground text-background border-foreground shadow-md shadow-black/30' 
+              : 'bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground'
+          }`}>Home</Link>
+          <Link href="/dashboard" className="inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground">Tools</Link>
+          <Link href="/pricing" className="inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground">Pricing</Link>
+          <Link href="/about" className="inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground">About</Link>
         </nav>
 
         <div className="flex items-center gap-3">
