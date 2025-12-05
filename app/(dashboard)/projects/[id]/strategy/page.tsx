@@ -220,7 +220,7 @@ export default function StrategyPage({ params }: { params: { id: string } }) {
               </div>
               <div>
                 <Label className="mb-1" htmlFor="audience">Who is this for?</Label>
-                <Textarea id="audience" rows={3} value={audienceDesc} onChange={(e) => setAudienceDesc(e.target.value)} placeholder="Describe your target audience, their pain points and level." />
+                <Textarea id="audience" rows={3} value={audienceDesc} onChange={(e) => setAudienceDesc(e.target.value)} placeholder="Describe your target audience, their main points and level." />
               </div>
             </section>
 

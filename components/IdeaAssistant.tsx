@@ -48,8 +48,23 @@ export function IdeaAssistant({
           constraints,
         }),
       })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Failed to generate ideas')
+
+      // Handle non-JSON error bodies gracefully (e.g., HTML error pages)
+      const text = await res.text()
+      let json: any = null
+      try {
+        json = text ? JSON.parse(text) : null
+      } catch (_) {
+        // Leave json as null if parsing fails
+      }
+
+      if (!res.ok) {
+        const message = json?.error || text || `Request failed (${res.status})`
+        throw new Error(message)
+      }
+
+      if (!json) throw new Error('No response from server')
+
       setIdeas(json.ideas || [])
     } catch (e: any) {
       setError(e.message || 'Unexpected error')

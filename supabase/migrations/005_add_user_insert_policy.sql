@@ -4,3 +4,4 @@ CREATE POLICY "Users can create own record" ON public.users
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 
+
