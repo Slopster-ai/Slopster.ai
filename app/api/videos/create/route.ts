@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
     const key = String(body.key || '')
     if (!projectId || !key) return NextResponse.json({ error: 'projectId and key are required' }, { status: 400 })
 
-    const bucket = process.env.AWS_S3_BUCKET!
+    const bucket = process.env.AWS_S3_BUCKET
+    if (!bucket) {
+      return NextResponse.json({ error: 'AWS_S3_BUCKET environment variable is not configured' }, { status: 500 })
+    }
     const original_url = `s3://${bucket}/${key}`
 
     const supabase = await createClient()

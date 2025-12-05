@@ -100,57 +100,7 @@ export default function ScriptEditor({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-      <div className="surface hairline rounded-2xl p-4 lg:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-medium">Script</h2>
-          <div className="flex items-center gap-2">
-            <Button onClick={saveEdits} disabled={saved === 'saving'}>
-              {saved === 'saving' ? 'Saving…' : saved === 'saved' ? 'Saved' : 'Save'}
-            </Button>
-          </div>
-        </div>
-        <Textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onSelect={snapshotSelection}
-          rows={22}
-          className="min-h-[60vh]"
-        />
-
-        {sel && selText && (
-          <div className="mt-3 rounded-xl hairline p-3 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-muted">Selected ({sel.end - sel.start} chars)</span>
-              <button
-                type="button"
-                onClick={() => { setSel(null); setSelText('') }}
-                className="text-muted hover:text-foreground"
-              >
-                Clear
-              </button>
-            </div>
-            <div className="mt-2 max-h-28 overflow-auto rounded-lg bg-surface p-2 text-foreground whitespace-pre-wrap">
-              {selText}
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={rewriteSelection} className="mt-4 flex flex-col sm:flex-row gap-2">
-          <Input
-            placeholder="Ask AI to rewrite selection (e.g., make this more detailed)"
-            value={instruction}
-            onChange={(e) => setInstruction(e.target.value)}
-            onMouseDown={snapshotSelection}
-            className="flex-1"
-          />
-          <Button type="submit" disabled={loading || !instruction.trim()} onMouseDown={snapshotSelection}>
-            {loading ? 'Rewriting…' : 'Rewrite selection'}
-          </Button>
-        </form>
-      </div>
-
+    <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
       <aside className="surface hairline rounded-2xl p-4 lg:p-6">
         <h3 className="text-base font-medium mb-3">Settings</h3>
         <div className="space-y-4">
@@ -221,6 +171,56 @@ export default function ScriptEditor({
           </div>
         </div>
       </aside>
+
+      <div className="surface hairline rounded-2xl p-4 lg:p-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-medium">Script</h2>
+          <div className="flex items-center gap-2">
+            <Button onClick={saveEdits} disabled={saved === 'saving'}>
+              {saved === 'saving' ? 'Saving…' : saved === 'saved' ? 'Saved' : 'Save'}
+            </Button>
+          </div>
+        </div>
+        <Textarea
+          ref={textareaRef}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onSelect={snapshotSelection}
+          rows={22}
+          className="min-h-[60vh]"
+        />
+
+        {sel && selText && (
+          <div className="mt-3 rounded-xl hairline p-3 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-muted">Selected ({sel.end - sel.start} chars)</span>
+              <button
+                type="button"
+                onClick={() => { setSel(null); setSelText('') }}
+                className="text-muted hover:text-foreground"
+              >
+                Clear
+              </button>
+            </div>
+            <div className="mt-2 max-h-28 overflow-auto rounded-lg bg-surface p-2 text-foreground whitespace-pre-wrap">
+              {selText}
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={rewriteSelection} className="mt-4 flex flex-col sm:flex-row gap-2">
+          <Input
+            placeholder="Ask AI to rewrite selection (e.g., make this more detailed)"
+            value={instruction}
+            onChange={(e) => setInstruction(e.target.value)}
+            onMouseDown={snapshotSelection}
+            className="flex-1"
+          />
+          <Button type="submit" disabled={loading || !instruction.trim()} onMouseDown={snapshotSelection}>
+            {loading ? 'Rewriting…' : 'Rewrite selection'}
+          </Button>
+        </form>
+      </div>
     </div>
   )
 }
