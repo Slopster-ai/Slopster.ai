@@ -59,13 +59,22 @@ export function IdeaAssistant({
       }
 
       if (!res.ok) {
-        const message = json?.error || text || `Request failed (${res.status})`
+        // If backend fails to produce ideas, show a friendlier message
+        const fallback = json?.ideas?.length === 0 ? 'Ideas are empty. Please try again.' : null
+        const message = json?.error || fallback || text || `Request failed (${res.status})`
         throw new Error(message)
       }
 
       if (!json) throw new Error('No response from server')
 
-      setIdeas(json.ideas || [])
+      const ideas = json.ideas || []
+      if (!Array.isArray(ideas) || ideas.length === 0) {
+        setError('Ideas are empty. Please try again.')
+        setIdeas([])
+        return
+      }
+
+      setIdeas(ideas)
     } catch (e: any) {
       setError(e.message || 'Unexpected error')
     } finally {
