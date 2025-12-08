@@ -187,3 +187,4 @@ Once AWS is configured:
 - [IAM User Guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/)
 - Check the main `AWS_SETUP.md` for advanced Lambda/SQS setup
 
+

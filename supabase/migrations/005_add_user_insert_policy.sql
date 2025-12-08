@@ -7,3 +7,4 @@ CREATE POLICY "Users can create own record" ON public.users
 
 
 
+
