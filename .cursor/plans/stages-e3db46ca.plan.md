@@ -1,4 +1,36 @@
-<!-- e3db46ca-61f7-499b-9e86-c9571900976d 4f8ae2cb-5834-4e67-bbe6-04d04e622e97 -->
+---
+name: Stages 3–7 Roadmap (TikTok-first, cohesive UX)
+overview: ""
+todos:
+  - id: 5b28ce03-7ead-491a-af1e-a9134755ea53
+    content: Add migration for brand_context, strategy_context, flow_stage to Supabase
+    status: completed
+  - id: 23c0359d-e53d-4213-a0b4-fe6131ca72fb
+    content: Regenerate/update `types/database.types.ts` for new columns
+    status: completed
+  - id: 97dec069-1daf-4d70-ba08-777dbf2db9b2
+    content: Create GET/PUT profile context API at `app/api/profile/context`
+    status: completed
+  - id: 1ad5b25b-62b3-4468-a2e3-f497411b1fc0
+    content: Create GET/PUT project strategy API at `app/api/projects/[id]/strategy`
+    status: completed
+  - id: be5514af-2e36-445c-ad0e-1fc30621e427
+    content: Create POST ideas generation API at `app/api/ideas/generate`
+    status: completed
+  - id: 62fc4c34-427d-4681-862d-a2562fdd0601
+    content: Build Stage 1 page at `projects/[id]/strategy` with form
+    status: completed
+  - id: 668c13fb-7df9-4f43-a35f-96fd54bdb411
+    content: Add `components/IdeaAssistant.tsx` with list/select UX
+    status: completed
+  - id: 71cff2e0-c1f7-4073-8a5a-0bde34d8cc16
+    content: Plumb `ScriptGenerator` to use `strategy_context` and continue flow
+    status: completed
+  - id: f1fcabb7-53f9-4e20-acec-d52fe5ecc382
+    content: On Continue, call `/api/scripts/generate` then redirect to script page
+    status: completed
+---
+
 # Stages 3–7 Roadmap (TikTok-first, cohesive UX)
 
 ## Cohesive UX principles
@@ -48,15 +80,3 @@
 - Extend stepper to 4–7; ensure next-step is clickable right after advancing (`step <= flow_stage+1`).
 - Bottom-page CTAs on all stage pages to advance/skip; back links visible but don’t change `flow_stage`.
 - Seed data between stages (idea → script → captions; uploaded video → editor; editor → render output → post).
-
-### To-dos
-
-- [x] Add migration for brand_context, strategy_context, flow_stage to Supabase
-- [x] Regenerate/update `types/database.types.ts` for new columns
-- [x] Create GET/PUT profile context API at `app/api/profile/context`
-- [x] Create GET/PUT project strategy API at `app/api/projects/[id]/strategy`
-- [x] Create POST ideas generation API at `app/api/ideas/generate`
-- [x] Build Stage 1 page at `projects/[id]/strategy` with form
-- [x] Add `components/IdeaAssistant.tsx` with list/select UX
-- [x] Plumb `ScriptGenerator` to use `strategy_context` and continue flow
-- [x] On Continue, call `/api/scripts/generate` then redirect to script page
