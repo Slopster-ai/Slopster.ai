@@ -13,18 +13,8 @@ export default async function ProjectLayout({
   params: { id: string }
 }) {
   const user = await getUser()
-  const supabase = await createClient()
-
-  let flowStage = 1
-  if (user) {
-    const { data } = await supabase
-      .from('projects')
-      .select('flow_stage')
-      .eq('id', params.id)
-      .eq('user_id', user.id)
-      .single()
-    if (typeof data?.flow_stage === 'number') flowStage = data.flow_stage
-  }
+  // For now the flow is condensed into a single AI stage.
+  const flowStage = 1
 
   return (
     <div>

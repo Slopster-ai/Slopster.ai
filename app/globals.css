@@ -51,12 +51,65 @@ html {
 body {
   color: var(--foreground);
   background: var(--background);
+  position: relative;
   font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   line-height: var(--leading);
   letter-spacing: var(--tracking);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden; /* prevent tiny overflows from shifting layout off-center */
+}
+
+/* Subtle animated gradient background */
+@keyframes background-shift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-4%, -6%, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  background:
+    radial-gradient(ellipse 45% 38% at 18% 18%, rgba(99, 102, 241, 0.22), transparent 45%),
+    radial-gradient(ellipse 40% 32% at 80% 12%, rgba(56, 189, 248, 0.22), transparent 40%),
+    radial-gradient(ellipse 42% 34% at 38% 78%, rgba(16, 185, 129, 0.18), transparent 42%),
+    radial-gradient(ellipse 36% 30% at 86% 76%, rgba(251, 191, 36, 0.16), transparent 36%);
+  background-repeat: no-repeat;
+  background-size: 160% 160%;
+  filter: blur(120px);
+  opacity: 0.9;
+  animation: background-shift 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+/* Slime loader */
+@keyframes slime-move {
+  0% { transform: translateX(-60%); background-position: 0% 50%; }
+  50% { transform: translateX(10%); background-position: 80% 50%; }
+  100% { transform: translateX(60%); background-position: 120% 50%; }
+}
+
+.slime-bar {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.9), rgba(52, 211, 153, 0.75), rgba(16, 185, 129, 0.1));
+  background-size: 300% 100%;
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.3);
+  animation: slime-move 1.6s ease-in-out infinite;
+  filter: saturate(1.2);
+}
+
+.glass-sheen {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
 }
 
 /* Selection and focus to feel intentional and accessible */
@@ -122,6 +175,44 @@ body {
       transform: scaleX(1);
       opacity: 0.9;
     }
+  }
+
+  /* Audio controls styling */
+  audio {
+    width: 100%;
+  }
+  
+  audio::-webkit-media-controls-panel {
+    background-color: var(--surface);
+  }
+  
+  audio::-webkit-media-controls-play-button,
+  audio::-webkit-media-controls-pause-button {
+    background-color: var(--foreground);
+    border-radius: 50%;
+  }
+  
+  audio::-webkit-media-controls-timeline {
+    background-color: var(--border);
+    border-radius: 2px;
+  }
+  
+  audio::-webkit-media-controls-current-time-display,
+  audio::-webkit-media-controls-time-remaining-display {
+    color: var(--foreground);
+  }
+  
+  /* Ensure progress bar shows correctly */
+  audio::-webkit-media-controls-timeline-container {
+    background-color: var(--border);
+  }
+  
+  audio::-webkit-media-controls-timeline {
+    background-color: var(--border);
+  }
+  
+  audio::-webkit-media-controls-play-button {
+    background-color: var(--foreground);
   }
 }
 

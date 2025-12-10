@@ -29,15 +29,17 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: system },
         { role: 'user', content: userPrompt },
       ],
-      max_completion_tokens: 800,
+      max_tokens: 800,
       temperature: 0.9,
-      response_format: { type: 'json_object' },
     })
 
     const content = completion.choices[0].message.content
     if (!content) return NextResponse.json({ error: 'Model error' }, { status: 500 })
     let parsed: any = {}
-    try { parsed = JSON.parse(content) } catch {}
+    try {
+      const cleaned = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '')
+      parsed = JSON.parse(cleaned)
+    } catch {}
     const caption = parsed.caption || ''
     const hashtags: string[] = Array.isArray(parsed.hashtags) ? parsed.hashtags : []
     return NextResponse.json({ caption, hashtags })

@@ -36,9 +36,8 @@ export async function POST(req: NextRequest) {
         { role: 'system', content: system },
         { role: 'user', content: userPrompt },
       ],
-      max_completion_tokens: 600,
+      max_tokens: 600,
       temperature: 0.7,
-      response_format: { type: 'json_object' },
     })
   } catch (error: any) {
     if (error?.status === 429 || error?.code === 'insufficient_quota') {

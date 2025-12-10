@@ -8,7 +8,6 @@ import VideoUploader from '@/components/VideoUploader'
 import { Container } from '@/components/ui/Container'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { Progress } from '@/components/ui/Progress'
 import JobProgress from '@/components/JobProgress'
 import ProjectSettings from '@/components/ProjectSettings'
 
@@ -28,11 +27,6 @@ export default async function ProjectPage({ params }: { params: { id: string } }
 
   if (!project) {
     notFound()
-  }
-
-  // Redirect to Strategy first if not completed
-  if ((project as any).flow_stage && (project as any).flow_stage < 2) {
-    redirect(`/projects/${params.id}/strategy`)
   }
 
   // Fetch scripts

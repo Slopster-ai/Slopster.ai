@@ -19,7 +19,7 @@ export default function ScriptGenerator({ projectId }: ScriptGeneratorProps) {
   const [generatedScript, setGeneratedScript] = useState<any>(null)
   const router = useRouter()
 
-  // Prefill from strategy_context when available
+  // Prefill platform/duration from strategy when available (leave prompt empty)
   useEffect(() => {
     let cancelled = false
     const load = async () => {
@@ -34,29 +34,12 @@ export default function ScriptGenerator({ projectId }: ScriptGeneratorProps) {
         if (!profileRes.ok) throw new Error(profile.error || 'Failed to load profile')
 
         const sc = strategy.strategy_context || {}
-        const bc = profile.brand_context || {}
 
         if (sc.platform) setPlatform(sc.platform)
         if (sc.selectedIdea?.durationSec) {
           const d = Math.max(15, Math.min(180, Number(sc.selectedIdea.durationSec) || 30))
           setDuration(d)
         }
-        // Seed prompt
-        const parts: string[] = []
-        if (bc.brandVoice) parts.push(`Brand voice: ${bc.brandVoice}`)
-        if (bc.channelSummary) parts.push(`Channel: ${bc.channelSummary}`)
-        if (sc.purpose) parts.push(`Purpose: ${sc.purpose}`)
-        if (sc.audience?.description) parts.push(`Audience: ${sc.audience.description}`)
-        if (sc.selectedIdea) {
-          parts.push(`Idea: ${sc.selectedIdea.title}`)
-          if (sc.selectedIdea.hook) parts.push(`Hook: ${sc.selectedIdea.hook}`)
-          if (Array.isArray(sc.selectedIdea.outline)) {
-            parts.push('Outline:')
-            for (const b of sc.selectedIdea.outline) parts.push(`- ${b}`)
-          }
-        }
-        const seeded = parts.join('\n')
-        if (!cancelled && seeded) setPrompt(seeded)
       } catch (_) {
         // Ignore prefill errors; keep defaults
       }

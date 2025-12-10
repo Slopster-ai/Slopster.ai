@@ -21,8 +21,13 @@ export interface VideoProcessingJob {
 }
 
 export async function enqueueVideoJob(job: VideoProcessingJob) {
+  const queueUrl = process.env.AWS_SQS_QUEUE_URL
+  if (!queueUrl) {
+    throw new Error('AWS_SQS_QUEUE_URL environment variable is not set. Please configure it in your environment variables or create an SQS queue.')
+  }
+
   const command = new SendMessageCommand({
-    QueueUrl: process.env.AWS_SQS_QUEUE_URL!,
+    QueueUrl: queueUrl,
     MessageBody: JSON.stringify(job),
   })
 

@@ -14,6 +14,19 @@ export default function NavBar() {
   const router = useRouter()
   const supabase = useMemo(() => createSupabaseClient(), [])
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null)
+  const linkBase = 'inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm'
+
+  const linkClass = (href: string) => {
+    const active =
+      href === '/'
+        ? pathname === '/'
+        : pathname === href || pathname.startsWith(`${href}/`)
+    return `${linkBase} ${
+      active
+        ? 'bg-foreground text-background border-foreground shadow-md shadow-black/30'
+        : 'bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground'
+    }`
+  }
 
   useEffect(() => {
     let mounted = true
@@ -33,7 +46,6 @@ export default function NavBar() {
     await supabase.auth.signOut()
     router.push('/')
   }
-  const linkBase = 'text-sm text-muted hover:text-foreground transition-colors'
 
   return (
     <header className="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-black/40">
@@ -49,14 +61,10 @@ export default function NavBar() {
         </Link>
 
         <nav className="pointer-events-auto absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:flex items-center gap-3">
-          <Link href="/" className={`inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm ${
-            pathname === '/' 
-              ? 'bg-foreground text-background border-foreground shadow-md shadow-black/30' 
-              : 'bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground'
-          }`}>Home</Link>
-          <Link href="/dashboard" className="inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground">Tools</Link>
-          <Link href="/pricing" className="inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground">Pricing</Link>
-          <Link href="/about" className="inline-flex items-center rounded-full px-3 py-1 text-sm border backdrop-blur-sm transition-colors shadow-sm bg-white/5 text-muted border-white/10 hover:border-white/20 hover:text-foreground">About</Link>
+          <Link href="/" className={linkClass('/')}>Home</Link>
+          <Link href="/dashboard" className={linkClass('/dashboard')}>Tools</Link>
+          <Link href="/pricing" className={linkClass('/pricing')}>Pricing</Link>
+          <Link href="/about" className={linkClass('/about')}>About</Link>
         </nav>
 
         <div className="flex items-center gap-3">

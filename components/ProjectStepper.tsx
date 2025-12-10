@@ -9,14 +9,16 @@ export function ProjectStepper({ projectId, flowStage }: { projectId: string; fl
   const steps = [
     { step: 1, label: 'Idea & Strategy', href: `/projects/${projectId}/strategy` },
     { step: 2, label: 'Script', href: `/projects/${projectId}` },
-    { step: 3, label: 'Record', href: `/projects/${projectId}/shoot` },
-    { step: 4, label: 'Edit', href: `/projects/${projectId}/edit` },
-    { step: 5, label: 'Sound', href: `/projects/${projectId}/sound` },
-    { step: 6, label: 'Post', href: `/projects/${projectId}/post` },
-    { step: 7, label: 'Analyze', href: `/projects/${projectId}/analyze` },
+    { step: 3, label: 'AI Content', href: `/projects/${projectId}/shoot` },
   ]
 
-  const current = steps.findIndex((s) => pathname.startsWith(s.href))
+  // Match the longest href first to avoid partial matches (e.g., /projects/[id] vs /projects/[id]/shoot)
+  const current = steps.reduce((matchIdx, s, idx) => {
+    const isMatch = pathname === s.href || pathname.startsWith(`${s.href}/`)
+    if (!isMatch) return matchIdx
+    const prevHref = matchIdx >= 0 ? steps[matchIdx].href : ''
+    return s.href.length > prevHref.length ? idx : matchIdx
+  }, -1)
 
   return (
     <div className="border-b border-white/10 bg-[rgba(255,255,255,0.02)]">
@@ -24,7 +26,7 @@ export function ProjectStepper({ projectId, flowStage }: { projectId: string; fl
         <nav className="flex items-center gap-4 text-sm">
           {steps.map((s, i) => (
             <div key={s.step} className="flex items-center gap-4">
-              <Step href={s.href} step={s.step} label={s.label} active={current === i} enabled={s.step <= flowStage + 1} />
+              <Step href={s.href} step={s.step} label={s.label} active={current === i} enabled={true} />
               {i < steps.length - 1 && <span className="text-muted">/</span>}
             </div>
           ))}

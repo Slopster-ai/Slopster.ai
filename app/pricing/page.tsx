@@ -26,9 +26,10 @@ export default function PricingPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="relative border-2 border-sky-400/60 bg-gradient-to-br from-sky-500/10 via-cyan-500/8 to-sky-600/10 shadow-[0_0_30px_rgba(56,189,248,0.2),0_8px_24px_rgba(14,165,233,0.15),inset_0_1px_0_rgba(125,211,252,0.25),inset_0_-1px_0_rgba(14,165,233,0.2)] backdrop-blur-sm">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-400/10 via-transparent to-cyan-500/10 pointer-events-none" />
             <CardHeader>
-              <CardTitle>Creator</CardTitle>
+              <CardTitle className="text-sky-100 font-semibold">Creator</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm text-muted">
@@ -36,7 +37,7 @@ export default function PricingPage() {
                 <li>• Auto edit + captions</li>
                 <li>• Optimizer</li>
               </ul>
-              <Button className="mt-6 w-full">Get started</Button>
+              <Button className="mt-6 w-full bg-sky-500/80 text-white hover:bg-sky-500">Coming soon...</Button>
             </CardContent>
           </Card>
 
@@ -52,7 +53,7 @@ export default function PricingPage() {
                 <li>• Access to our best services</li>
                 <li>• 24/7 customer help</li>
               </ul>
-              <Button className="mt-6 w-full" variant="subtle">Contact us</Button>
+              <Button className="mt-6 w-full" variant="subtle">Coming soon...</Button>
             </CardContent>
           </Card>
         </div>

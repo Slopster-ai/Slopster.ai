@@ -62,13 +62,34 @@ export async function POST(request: NextRequest) {
     // Generate output key
     const outputKey = inputKey.replace('uploads/', 'outputs/').replace(/\.[^.]+$/, '-processed.mp4')
 
-    // Enqueue job to SQS
-    await enqueueVideoJob({
-      jobId: job.id,
-      inputKey,
-      outputKey,
-      operations,
-    })
+    // Enqueue job to SQS (if configured)
+    try {
+      await enqueueVideoJob({
+        jobId: job.id,
+        inputKey,
+        outputKey,
+        operations,
+      })
+    } catch (error: any) {
+      // If SQS is not configured, mark job as failed with helpful error
+      if (error.message?.includes('AWS_SQS_QUEUE_URL') || error.message?.includes('queue does not exist')) {
+        await supabase
+          .from('jobs')
+          .update({ 
+            status: 'failed', 
+            error: 'SQS queue not configured. Please set up AWS_SQS_QUEUE_URL environment variable.' 
+          })
+          .eq('id', job.id)
+        return NextResponse.json(
+          { 
+            error: 'SQS queue not configured. Please create an SQS queue and set AWS_SQS_QUEUE_URL in your environment variables.',
+            jobId: job.id 
+          },
+          { status: 500 }
+        )
+      }
+      throw error
+    }
 
     // Update video status
     await supabase
