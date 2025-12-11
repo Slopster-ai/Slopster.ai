@@ -23,6 +23,37 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const user = await getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const supabase = await createClient()
+
+    // Verify ownership via project
+    const { data: script } = await supabase
+      .from('scripts')
+      .select('id, project_id, projects!inner(user_id)')
+      .eq('id', params.id)
+      .single()
+
+    if (!script || script.projects.user_id !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    const { error } = await supabase
+      .from('scripts')
+      .delete()
+      .eq('id', params.id)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 })
+  }
+}
+
 
 
 

@@ -10,6 +10,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import JobProgress from '@/components/JobProgress'
 import ProjectSettings from '@/components/ProjectSettings'
+import InlineScriptEditor from '@/components/InlineScriptEditor'
+
+function toText(content: any): string {
+  try {
+    if (!content) return ''
+    if (typeof content.edited_text === 'string') return content.edited_text
+    const parts: string[] = []
+    if (content.hook) parts.push(`HOOK:\n${content.hook}\n`)
+    if (Array.isArray(content.body)) {
+      parts.push('BODY:')
+      for (const line of content.body) parts.push(`- ${line}`)
+      parts.push('')
+    }
+    if (content.cta) parts.push(`CTA:\n${content.cta}`)
+    return parts.join('\n')
+  } catch {
+    return typeof content === 'string' ? content : JSON.stringify(content, null, 2)
+  }
+}
 
 export default async function ProjectPage({ params }: { params: { id: string } }) {
   const user = await getUser()
@@ -64,42 +83,6 @@ export default async function ProjectPage({ params }: { params: { id: string } }
             </CardHeader>
             <CardContent>
               <ScriptGenerator projectId={params.id} />
-
-              {scripts && scripts.length > 0 && (
-                <div className="mt-6 space-y-4">
-                  <h3 className="text-lg font-medium">Generated scripts</h3>
-                  {scripts.map((script) => {
-                    const content: any = script.content || {}
-                    const raw = typeof content.edited_text === 'string'
-                      ? content.edited_text as string
-                      : (() => {
-                          const parts: string[] = []
-                          if (content.hook) parts.push(`HOOK:\n${content.hook}\n`)
-                          if (Array.isArray(content.body)) {
-                            parts.push('BODY:')
-                            for (const line of content.body) parts.push(`- ${line}`)
-                            parts.push('')
-                          }
-                          if (content.cta) parts.push(`CTA:\n${content.cta}`)
-                          return parts.join('\n')
-                        })()
-                    const preview = raw.length > 220 ? raw.slice(0, 220) + '…' : raw
-                    return (
-                      <Link key={script.id} href={`/projects/${params.id}/scripts/${script.id}`} className="block p-4 rounded-xl hairline hover:shadow-depth transition-shadow">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-xs text-muted capitalize">
-                            {script.platform} • {script.duration}s • {script.tone}
-                          </span>
-                          <Badge variant="subtle">${script.cost.toFixed(4)}</Badge>
-                        </div>
-                        <p className="text-sm text-foreground/80 whitespace-pre-wrap">
-                          {preview || 'No preview available.'}
-                        </p>
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -132,6 +115,17 @@ export default async function ProjectPage({ params }: { params: { id: string } }
             </CardContent>
           </Card>
         </div>
+
+        {scripts && scripts.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Generated scripts & inline editor</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <InlineScriptEditor scripts={scripts as any} projectId={params.id} />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Container>
   )

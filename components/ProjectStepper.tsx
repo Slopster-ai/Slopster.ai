@@ -10,6 +10,7 @@ export function ProjectStepper({ projectId, flowStage }: { projectId: string; fl
     { step: 1, label: 'Idea & Strategy', href: `/projects/${projectId}/strategy` },
     { step: 2, label: 'Script', href: `/projects/${projectId}` },
     { step: 3, label: 'AI Content', href: `/projects/${projectId}/shoot` },
+    { step: 4, label: 'Final Video', href: `/projects/${projectId}/final` },
   ]
 
   // Match the longest href first to avoid partial matches (e.g., /projects/[id] vs /projects/[id]/shoot)
@@ -49,7 +50,14 @@ function Step({ href, step, label, active, enabled }: { href: string; step: numb
   )
 
   if (!enabled) {
-    return <div className="opacity-60 cursor-not-allowed select-none border-transparent">{content}</div>
+    return (
+      <div
+        className="inline-block rounded-full border border-white/10 backdrop-blur-sm shadow-sm opacity-40 cursor-not-allowed select-none"
+        title="Finish earlier stages to unlock"
+      >
+        {content}
+      </div>
+    )
   }
   return (
     <Link 

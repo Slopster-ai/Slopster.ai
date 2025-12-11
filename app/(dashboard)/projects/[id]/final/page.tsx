@@ -1,9 +1,6 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Container } from '@/components/ui/Container'
-import { Button } from '@/components/ui/Button'
 import { AIContentGenerator } from '@/components/AIContentGenerator'
-import { ResumeBanner } from '@/components/ResumeBanner'
 import { getUser } from '@/lib/supabase/auth'
 import { createClient } from '@/lib/supabase/server'
 
@@ -25,12 +22,11 @@ function toText(content: any): string {
   }
 }
 
-export default async function ShootPage({ params }: { params: { id: string } }) {
+export default async function FinalPage({ params, searchParams }: { params: { id: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
   const user = await getUser()
   if (!user) redirect('/login')
   const supabase = await createClient()
 
-  // Prefill with the latest script if available
   const { data: scripts } = await supabase
     .from('scripts')
     .select('*')
@@ -44,40 +40,25 @@ export default async function ShootPage({ params }: { params: { id: string } }) 
   return (
     <Container>
       <div className="py-10 space-y-6">
-        <ResumeBanner />
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl bg-surface p-4 hairline">
-          <div>
-            <h1 className="text-3xl font-medium">AI Content Studio</h1>
-            <p className="text-sm text-muted mt-1">Paste your script to generate voiceover, captions, and storyboard images.</p>
-          </div>
-          <div className="rounded-xl border border-emerald-300/50 bg-emerald-500/10 px-2 py-2 shadow-[0_8px_30px_rgba(16,185,129,0.25)]">
-            <Link href={`/projects/${params.id}/final?startRender=1`}>
-              <Button size="lg" variant="secondary" className="w-full whitespace-normal text-left sm:text-center">
-                Looking good? Now let&apos;s make a video!
-              </Button>
-            </Link>
+        <div className="rounded-2xl bg-surface p-4 hairline">
+          <div className="flex flex-col gap-1">
+            <p className="text-xs uppercase tracking-wide text-muted">Stage 7</p>
+            <h1 className="text-3xl font-medium">Final Video</h1>
+            <p className="text-sm text-muted">Render the full video, then head to edit if anything looks off.</p>
           </div>
         </div>
 
         <AIContentGenerator
           projectId={params.id}
           initialScript={initialScript}
-          showFinalStage={false}
-          showResultBlocks
-          enableResumeEventTrigger
+          showFinalStage
+          showResultBlocks={false}
+          showScriptInput={false}
+          autoRender={searchParams?.startRender === '1'}
+          autoResume
         />
       </div>
     </Container>
   )
 }
-
-
-
-
-
-
-
-
-
-
 

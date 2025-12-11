@@ -1,9 +1,7 @@
 # Supabase Local Development Configuration
 # See: https://supabase.com/docs/guides/cli/config
 
-[project]
-project_id = ""
-name = "slopster-ai"
+project_id = "yxuuvlcuupygjhdoxmhi"
 
 [api]
 enabled = true
@@ -15,7 +13,7 @@ max_rows = 1000
 [db]
 port = 54322
 shadow_port = 54320
-major_version = 15
+major_version = 17
 
 [realtime]
 enabled = true
@@ -49,7 +47,7 @@ double_confirm_changes = true
 enable_confirmations = false
 
 [auth.external.google]
-enabled = true
+enabled = false
 client_id = ""
 secret = ""
 

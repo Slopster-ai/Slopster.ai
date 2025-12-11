@@ -25,7 +25,9 @@ export async function generateScript(params: ScriptParams) {
   "body": ["Main point 1", "Main point 2", "Main point 3"],
   "cta": "Call to action",
   "timing": {"hook": 3, "body": ${duration - 8}, "cta": 5}
-}`,
+}
+
+Hard requirement: The total spoken word count must align with ${duration} seconds at ~3 words per second (±10%). Ensure the body list is detailed enough to fill the body timing. Include natural filler/connector phrases to meet the target duration. Keep language tight but long enough to hit the timing.`,
       },
       { role: 'user', content: prompt },
     ],
@@ -38,8 +40,10 @@ export async function generateScript(params: ScriptParams) {
     throw new Error('Failed to generate script from OpenAI')
   }
 
+  const normalized = stripCodeFences(content)
+
   return {
-    script: JSON.parse(content),
+    script: parseJsonSafe('script', normalized),
     usage: completion.usage,
     cost: calculateCost(completion.usage),
   }
@@ -82,7 +86,7 @@ export async function analyzeVirality(script: string): Promise<ViralityAnalysis>
   if (!content) {
     throw new Error('Failed to generate virality analysis from OpenAI')
   }
-  return JSON.parse(content)
+  return parseJsonSafe('virality', stripCodeFences(content))
 }
 
 function calculateCost(usage: any) {
@@ -90,6 +94,26 @@ function calculateCost(usage: any) {
   const inputCost = (usage.prompt_tokens / 1_000_000) * 2.5
   const outputCost = (usage.completion_tokens / 1_000_000) * 10.0
   return inputCost + outputCost
+}
+
+function stripCodeFences(raw: string) {
+  const trimmed = raw.trim()
+  const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)
+  if (fenceMatch && fenceMatch[1]) {
+    return fenceMatch[1].trim()
+  }
+  return trimmed
+}
+
+function parseJsonSafe(label: string, raw: string) {
+  const trimmed = raw.trim()
+  if (!trimmed) throw new Error(`Empty ${label} JSON from OpenAI`)
+  try {
+    return JSON.parse(trimmed)
+  } catch (err: any) {
+    const snippet = trimmed.slice(0, 400)
+    throw new Error(`Failed to parse ${label} JSON. Snippet: ${snippet}`)
+  }
 }
 
 export { openai }

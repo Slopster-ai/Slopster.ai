@@ -16,6 +16,10 @@ const requestSchema = z.object({
   frames: z.number().min(4).max(8).optional(),
 })
 
+const CARTESIA_API_KEY = process.env.CARTESIA_API_KEY
+const CARTESIA_API_URL = process.env.CARTESIA_API_URL || 'https://api.cartesia.ai/tts'
+const CARTESIA_VOICE_ID = process.env.CARTESIA_VOICE_ID || 'alloy'
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getUser()
@@ -66,15 +70,47 @@ export async function POST(req: NextRequest) {
             prompt: `A cinematic storyboard frame ${i + 1} derived from the script: ${script.slice(0, 200)}`,
           }))
 
-    // Generate TTS audio
-    const speech = await openai.audio.speech.create({
-      model: 'gpt-4o-mini-tts',
-      voice: 'alloy',
-      input: voiceoverScript,
-      format: 'mp3',
-    })
-    const audioBuffer = Buffer.from(await speech.arrayBuffer())
-    const audioBase64 = audioBuffer.toString('base64')
+    // Generate TTS audio (Cartesia if configured, else OpenAI fallback)
+    async function synthesizeWithCartesia() {
+      const res = await fetch(CARTESIA_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${CARTESIA_API_KEY}`,
+        },
+        body: JSON.stringify({
+          text: voiceoverScript,
+          voice: CARTESIA_VOICE_ID,
+          format: 'mp3',
+        }),
+      })
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        throw new Error(text || `Cartesia TTS failed (${res.status})`)
+      }
+      const buffer = Buffer.from(await res.arrayBuffer())
+      return buffer.toString('base64')
+    }
+
+    let audioBase64 = ''
+    if (CARTESIA_API_KEY) {
+      try {
+        audioBase64 = await synthesizeWithCartesia()
+      } catch (cartErr) {
+        console.error('Cartesia TTS failed, falling back to OpenAI:', cartErr)
+      }
+    }
+
+    if (!audioBase64) {
+      const speech = await openai.audio.speech.create({
+        model: 'gpt-4o-mini-tts',
+        voice: 'alloy',
+        input: voiceoverScript,
+        format: 'mp3',
+      })
+      const audioBuffer = Buffer.from(await speech.arrayBuffer())
+      audioBase64 = audioBuffer.toString('base64')
+    }
 
     // Generate images for each storyboard prompt
     const storyboard = []

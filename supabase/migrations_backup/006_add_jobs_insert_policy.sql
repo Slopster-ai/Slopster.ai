@@ -10,3 +10,4 @@ CREATE POLICY "Users can create jobs for own videos" ON public.jobs
     )
   );
 
+

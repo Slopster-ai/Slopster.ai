@@ -192,7 +192,7 @@ export function IdeaAssistant({
               key={idx} 
               className={`rounded-xl p-3 transition-all ${
                 isSelected 
-                  ? 'border-2 border-foreground bg-foreground/10 shadow-md' 
+                  ? 'border-2 border-emerald-400 bg-emerald-400/10 shadow-[0_8px_30px_rgba(16,185,129,0.2)]' 
                   : 'hairline bg-surface'
               }`}
             >
@@ -213,10 +213,10 @@ export function IdeaAssistant({
                   )}
                 </div>
                 <Button 
-                  variant={isSelected ? "primary" : "subtle"} 
+                  variant={isSelected ? "secondary" : "subtle"} 
                   size="sm" 
                   onClick={() => onSelect(idea)} 
-                  className="flex-shrink-0"
+                  className={`flex-shrink-0 ${isSelected ? 'bg-emerald-500/90 text-white hover:bg-emerald-500' : ''}`}
                 >
                   {isSelected ? 'Selected' : 'Select'}
                 </Button>

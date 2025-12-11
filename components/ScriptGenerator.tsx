@@ -12,7 +12,7 @@ interface ScriptGeneratorProps {
 export default function ScriptGenerator({ projectId }: ScriptGeneratorProps) {
   const [prompt, setPrompt] = useState('')
   const [platform, setPlatform] = useState<'tiktok' | 'youtube-shorts' | 'instagram-reels'>('tiktok')
-  const [duration, setDuration] = useState(30)
+  const [duration, setDuration] = useState(45)
   const [tone, setTone] = useState<'casual' | 'professional' | 'humorous' | 'inspirational'>('casual')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

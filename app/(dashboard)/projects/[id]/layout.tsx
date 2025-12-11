@@ -13,8 +13,8 @@ export default async function ProjectLayout({
   params: { id: string }
 }) {
   const user = await getUser()
-  // For now the flow is condensed into a single AI stage.
-  const flowStage = 1
+  // For now the flow is condensed; allow only stages 1-3.
+  const flowStage = 3
 
   return (
     <div>
