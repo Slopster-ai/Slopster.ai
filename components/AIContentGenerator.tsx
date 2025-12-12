@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from './ui/Button'
 import { Input, Label, Textarea } from './ui/Form'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card'
@@ -107,29 +108,13 @@ export function AIContentGenerator({
 
   useEffect(() => {
     // Reset final render when a new AI result replaces prior assets
-    if (finalVideoUrl) {
-      URL.revokeObjectURL(finalVideoUrl)
-      setFinalVideoUrl(null)
-    }
+    setFinalVideoUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev)
+      return null
+    })
     setRenderError(null)
     setRenderStatus('Ready')
   }, [result?.audioBase64, result?.storyboard, result?.subtitles])
-
-  useEffect(() => {
-    if (!autoRender || autoRenderTriggered.current) return
-    if (showFinalStage && result) {
-      autoRenderTriggered.current = true
-      renderFinalVideo()
-    }
-  }, [autoRender, showFinalStage, result])
-
-  useEffect(() => {
-    if (!autoResume || autoResumeTriggered.current) return
-    if (!result) {
-      autoResumeTriggered.current = true
-      resumeGeneration().catch(() => {})
-    }
-  }, [autoResume, result])
 
   function clearGeneration() {
     setResult(null)
@@ -214,7 +199,7 @@ export function AIContentGenerator({
     }
   }
 
-  async function resumeGeneration() {
+  const resumeGeneration = useCallback(async () => {
     setResumeError(null)
     setResumeLoading(true)
     try {
@@ -250,14 +235,14 @@ export function AIContentGenerator({
     } finally {
       setResumeLoading(false)
     }
-  }
+  }, [projectId, scriptStorageKey, storageKey])
 
   useEffect(() => {
     if (!enableResumeEventTrigger || typeof window === 'undefined') return
     const handler = () => resumeGeneration()
     window.addEventListener(RESUME_EVENT, handler)
     return () => window.removeEventListener(RESUME_EVENT, handler)
-  }, [enableResumeEventTrigger])
+  }, [enableResumeEventTrigger, resumeGeneration])
 
   function downloadAudio() {
     if (!result?.audioBase64) return
@@ -298,13 +283,13 @@ export function AIContentGenerator({
     return Number(ts) || 0
   }
 
-  function getResolution() {
+  const getResolution = useCallback(() => {
     return renderResolution === 'desktop'
       ? { width: 1920, height: 1080, aspect: '16 / 9' }
       : { width: 1080, height: 1920, aspect: '9 / 16' }
-  }
+  }, [renderResolution])
 
-  async function createVideoFromAssets(current: Result, dims: { width: number; height: number }) {
+  const createVideoFromAssets = useCallback(async (current: Result, dims: { width: number; height: number }) => {
     const canvas = document.createElement('canvas')
     canvas.width = dims.width
     canvas.height = dims.height
@@ -417,9 +402,9 @@ export function AIContentGenerator({
     const blob = new Blob(chunks, { type: mimeType })
     const url = URL.createObjectURL(blob)
     return url
-  }
+  }, [])
 
-  async function renderFinalVideo() {
+  const renderFinalVideo = useCallback(async () => {
     if (!result) {
       setRenderError('Generate content first, then render the final video.')
       return
@@ -455,7 +440,23 @@ export function AIContentGenerator({
     } finally {
       setRendering(false)
     }
-  }
+  }, [createVideoFromAssets, feedback, finalVideoUrl, getResolution, projectId, qualityPreset, renderResolution, result])
+
+  useEffect(() => {
+    if (!autoRender || autoRenderTriggered.current) return
+    if (showFinalStage && result) {
+      autoRenderTriggered.current = true
+      renderFinalVideo()
+    }
+  }, [autoRender, renderFinalVideo, result, showFinalStage])
+
+  useEffect(() => {
+    if (!autoResume || autoResumeTriggered.current) return
+    if (!result) {
+      autoResumeTriggered.current = true
+      resumeGeneration().catch(() => {})
+    }
+  }, [autoResume, result, resumeGeneration])
 
   return (
     <div className="relative space-y-6">
@@ -722,10 +723,14 @@ export function AIContentGenerator({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {result.storyboard.map((img, idx) => (
                     <div key={`${img.title}-${idx}`} className="rounded-xl overflow-hidden hairline bg-surface">
-                      <img
+                      <Image
                         src={`data:image/png;base64,${img.imageBase64}`}
                         alt={img.title || 'Storyboard frame'}
-                        className="w-full aspect-video object-contain bg-black"
+                        width={1280}
+                        height={720}
+                        className="w-full h-auto aspect-video object-contain bg-black"
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        unoptimized
                       />
                       <div className="p-3 space-y-1">
                         <div className="flex items-center justify-between gap-2">
