@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
           }))
 
     // Generate TTS audio (Cartesia if configured, else OpenAI fallback)
-    async function synthesizeWithCartesia() {
+    const synthesizeWithCartesia = async () => {
       const res = await fetch(CARTESIA_API_URL, {
         method: 'POST',
         headers: {

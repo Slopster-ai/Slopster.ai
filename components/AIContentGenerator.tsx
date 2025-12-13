@@ -440,7 +440,7 @@ export function AIContentGenerator({
     } finally {
       setRendering(false)
     }
-  }, [createVideoFromAssets, feedback, finalVideoUrl, getResolution, projectId, qualityPreset, renderResolution, result])
+  }, [createVideoFromAssets, feedback, finalVideoUrl, getResolution, projectId, qualityPreset, result])
 
   useEffect(() => {
     if (!autoRender || autoRenderTriggered.current) return
